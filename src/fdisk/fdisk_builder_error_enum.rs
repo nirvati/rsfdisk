@@ -7,8 +7,21 @@ use thiserror::Error;
 // From standard library
 
 // From this library
+use crate::fdisk::FdiskError;
 
-/// `FdiskBuilder` runtime errors.
+/// [`FdiskBuilder`](crate::fdisk::FdiskBuilder) runtime errors.
 #[derive(Debug, Error)]
 #[non_exhaustive]
-pub enum FdiskBuilderError {}
+pub enum FdiskBuilderError {
+    /// Error while configuring `Fdisk` instance.
+    #[error(transparent)]
+    Config(#[from] FdiskError),
+
+    /// Error if two mutually exclusive setter functions are called.
+    #[error("{0}")]
+    MutuallyExclusive(String),
+
+    /// Error if a required function was not called.
+    #[error("{0}")]
+    Required(String),
+}

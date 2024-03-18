@@ -85,6 +85,30 @@
 //!
 //! Example output:
 //! ```text
+//! libfdisk:     INIT: library debug mask: 0x0006
+//! libfdisk:     INIT: library version: 2.39.2
+//! libfdisk:      CXT: [0x7f9ed8000e30]: alloc
+//! libfdisk:      CXT: [0x7f9ed8000e30]: assigning device /dev/vda
+//! libfdisk:      CXT: [0x7f9ed8000e30]: *** resetting context
+//! libfdisk:      CXT: [0x7f9ed8000e30]:   freeing firstsector
+//! libfdisk:      CXT: [0x7f9ed8000e30]: /dev/vda: discovering topology...
+//! libfdisk:      CXT: [0x7f9ed8000e30]: initialize libblkid prober
+//! libfdisk:      CXT: [0x7f9ed8000e30]: result: log/phy sector size: 512/512
+//! libfdisk:      CXT: [0x7f9ed8000e30]: result: fdisk/optimal/minimal io: 512/0/512
+//! libfdisk:      CXT: [0x7f9ed8000e30]: /dev/vda: discovering geometry...
+//! libfdisk:      CXT: [0x7f9ed8000e30]: total sectors: 102400 (ioctl=0)
+//! libfdisk:      CXT: [0x7f9ed8000e30]: result: C/H/S: 6/255/63
+//! libfdisk:      CXT: [0x7f9ed8000e30]: applying user device properties
+//! libfdisk:      CXT: [0x7f9ed8000e30]: resetting alignment...
+//! libfdisk:      CXT: [0x7f9ed8000e30]: alignment reset to: first LBA=2048, last LBA=102399, grain=1048576 [rc=0]
+//! libfdisk:      CXT: [0x7f9ed8000e30]: initialize in-memory first sector buffer [sector_size=512]
+//! libfdisk:      CXT: [0x7f9ed8000e30]: reading: offset=0, size=512
+//! libfdisk:      CXT: [0x7f9ed8000e30]: new C/H/S: 6/255/63
+//! libfdisk:      CXT: [0x7f9ed8000e30]: new log/phy sector size: 512/512
+//! libfdisk:      CXT: [0x7f9ed8000e30]: zeroize in-memory first sector buffer
+//! libfdisk:      CXT: [0x7f9ed8000e30]: reading: offset=0, size=512
+//! libfdisk:      CXT: [0x7f9ed8000e30]: probing for gpt
+//! libfdisk:      CXT: [0x7f9ed8000e30]: --> switching context to gpt!
 //! ...snip...
 //! ```
 //!
@@ -95,6 +119,26 @@
 //!
 //! Example output:
 //! ```text
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::builder creating a new `FdiskBuilder` instance
+//! [DEBUG rsfdisk::fdisk::fdisk_builder_struct] FdiskBuilder::build building a new `Fdisk` instance
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::new creating a new `Fdisk` instance
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::new created a new `Fdisk` instance
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::assign_device_read_write assigning read-write device: /dev/vda
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::assign_device assigning read-write device: /dev/vda
+//! [DEBUG rsfdisk::ffi_utils] as_ref_path_to_c_string converting `AsRef<Path>` to `CString`: /dev/vda
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::assign_device assigned read-write device: /dev/vda
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::disable_dialogs disabling partitioning prompts
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::display_dialogs disabled dialogs
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::enable_metadata_wipe marking device metadata for erasure
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::wipe_metadata enabled erasure of device metadata
+//! [DEBUG rsfdisk::fdisk::fdisk_builder_struct] FdiskBuilder::build built a new `Fdisk` instance
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::partition_table_create creating GPT partition table
+//! [DEBUG rsfdisk::ffi_utils] as_ref_str_to_c_string converting `&str` to `CString`: gpt
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::create_partition_table created partition table
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::partition_table_write_to_disk writing partition table to disk
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::partition_table_write_to_disk wrote partition table to disk
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::device_is_image_file value: true
+//! [DEBUG rsfdisk::fdisk::fdisk_struct] Fdisk::drop deallocating `Fdisk` instance
 //! ...snip...
 //! ```
 //!

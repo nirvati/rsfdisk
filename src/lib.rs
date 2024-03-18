@@ -56,62 +56,62 @@
 //!
 //! ### Basic handlers and setting
 //! #### Context
-//! | `libfdisk`                              | `rsfdisk` |
-//! | ------------------                      | --------- |
-//! | [`struct fdisk_context`][1]             |           |
-//! | [`fdisk_assign_device`][2]              |           |
-//! | [`fdisk_assign_device_by_fd`][3]        |           |
-//! | [`fdisk_deassign_device`][4]            |           |
-//! | [`fdisk_reassign_device`][5]            |           |
-//! | [`fdisk_device_is_used`][6]             |           |
-//! | [`fdisk_enable_bootbits_protection`][7] |           |
-//! | [`fdisk_enable_details`][8]             |           |
-//! | [`fdisk_enable_listonly`][9]            |           |
-//! | [`fdisk_enable_wipe`][10]               |           |
-//! | [`fdisk_disable_dialogs`][11]           |           |
-//! | [`fdisk_get_alignment_offset`][12]      |           |
-//! | [`fdisk_get_collision`][13]             |           |
-//! | [`fdisk_get_devfd`][14]                 |           |
-//! | [`fdisk_get_devmodel`][15]              |           |
-//! | [`fdisk_get_devname`][16]               |           |
-//! | [`fdisk_get_devno`][17]                 |           |
-//! | [`fdisk_get_disklabel_item`][18]        |           |
-//! | [`fdisk_get_first_lba`][19]             |           |
-//! | [`fdisk_get_geom_cylinders`][20]        |           |
-//! | [`fdisk_get_geom_heads`][21]            |           |
-//! | [`fdisk_get_geom_sectors`][22]          |           |
-//! | [`fdisk_get_grain_size`][23]            |           |
-//! | [`fdisk_get_last_lba`][24]              |           |
-//! | [`fdisk_get_minimal_iosize`][25]        |           |
-//! | [`fdisk_get_nsectors`][26]              |           |
-//! | [`fdisk_get_optimal_iosize`][27]        |           |
-//! | [`fdisk_get_parent`][28]                |           |
-//! | [`fdisk_get_physector_size`][29]        |           |
-//! | [`fdisk_get_sector_size`][30]           |           |
-//! | [`fdisk_get_size_unit`][31]             |           |
-//! | [`fdisk_get_unit`][32]                  |           |
-//! | [`fdisk_get_units_per_sector`][33]      |           |
-//! | [`fdisk_has_dialogs`][34]               |           |
-//! | [`fdisk_has_label`][35]                 |           |
-//! | [`fdisk_has_protected_bootbits`][36]    |           |
-//! | [`fdisk_has_wipe`][37]                  |           |
-//! | [`fdisk_is_details`][38]                |           |
-//! | [`fdisk_is_labeltype`][39]              |           |
-//! | [`fdisk_is_listonly`][40]               |           |
-//! | [`fdisk_is_ptcollision`][41]            |           |
-//! | [`fdisk_is_readonly`][42]               |           |
-//! | [`fdisk_is_regfile`][43]                |           |
-//! | [`fdisk_new_context`][44]               |           |
-//! | [`fdisk_new_nested_context`][45]        |           |
-//! | [`fdisk_ref_context`][46]               |           |
-//! | [`fdisk_reread_changes`][47]            |           |
-//! | [`fdisk_reread_partition_table`][48]    |           |
-//! | [`fdisk_set_first_lba`][49]             |           |
-//! | [`fdisk_set_last_lba`][50]              |           |
-//! | [`fdisk_set_size_unit`][51]             |           |
-//! | [`fdisk_set_unit`][52]                  |           |
-//! | [`fdisk_unref_context`][53]             |           |
-//! | [`fdisk_use_cylinders`][54]             |           |
+//! | `libfdisk`                              | `rsfdisk`                                                                                                                                                                                        |
+//! | ------------------                      | ---------                                                                                                                                                                                        |
+//! | [`struct fdisk_context`][1]             | [`Fdisk`](crate::fdisk::Fdisk)                                                                                                                                                                   |
+//! | [`fdisk_assign_device`][2]              | [`FdiskBuilder::assign_device`](crate::fdisk::FdiskBuilder::assign_device)                                                                                                                       |
+//! | [`fdisk_assign_device_by_fd`][3]        | [`FdiskBuilder::assign_device_by_file`](crate::fdisk::FdiskBuilder::assign_device_by_file)                                                                                                       |
+//! | [`fdisk_deassign_device`][4]            | [`Fdisk::close_device`](crate::fdisk::Fdisk::close_device)<br>[`Fdisk::close_device_async`](crate::fdisk::Fdisk::close_device_async)                                                             |
+//! | [`fdisk_reassign_device`][5]            | [`Fdisk::discard_changes`](crate::fdisk::Fdisk::discard_changes)                                                                                                                                 |
+//! | [`fdisk_device_is_used`][6]             | [`Fdisk::device_is_in_use`](crate::fdisk::Fdisk::device_is_in_use)                                                                                                                               |
+//! | [`fdisk_enable_bootbits_protection`][7] | [`FdiskBuilder::erase_master_boot_record`](crate::fdisk::FdiskBuilder::erase_master_boot_record)                                                                                                 |
+//! | [`fdisk_enable_details`][8]             | [`FdiskBuilder::display_partition_details`](crate::fdisk::FdiskBuilder::display_partition_details)                                                                                               |
+//! | [`fdisk_enable_listonly`][9]            | [`FdiskBuilder::display_partition_list_only`](crate::fdisk::FdiskBuilder::display_partition_list_only)                                                                                           |
+//! | [`fdisk_enable_wipe`][10]               | [`FdiskBuilder::wipe_device_metadata`](crate::fdisk::FdiskBuilder::wipe_device_metadata)                                                                                                         |
+//! | [`fdisk_disable_dialogs`][11]           | [`FdiskBuilder::enable_interactive`](crate::fdisk::FdiskBuilder::enable_interactive)                                                                                                             |
+//! | [`fdisk_get_alignment_offset`][12]      | [`Fdisk::device_alignment_offset`](crate::fdisk::Fdisk::device_alignment_offset)                                                                                                                 |
+//! | [`fdisk_get_collision`][13]             | [`Fdisk::device_describe_collisions`](crate::fdisk::Fdisk::device_describe_collisions)                                                                                                           |
+//! | [`fdisk_get_devfd`][14]                 | [`Fdisk::device_borrow_fd`](crate::fdisk::Fdisk::device_borrow_fd)                                                                                                                               |
+//! | [`fdisk_get_devmodel`][15]              | [`Fdisk::device_model`](crate::fdisk::Fdisk::device_model)                                                                                                                                       |
+//! | [`fdisk_get_devname`][16]               | [`Fdisk::device_name`](crate::fdisk::Fdisk::device_name)                                                                                                                                         |
+//! | [`fdisk_get_devno`][17]                 | [`Fdisk::device_number`](crate::fdisk::Fdisk::device_number)                                                                                                                                     |
+//! | [`fdisk_get_disklabel_item`][18]        |                                                                                                                                                                                                  |
+//! | [`fdisk_get_first_lba`][19]             | [`Fdisk::device_first_lba`](crate::fdisk::Fdisk::device_first_lba)                                                                                                                               |
+//! | [`fdisk_get_geom_cylinders`][20]        | [`Fdisk::device_count_cylinders`](crate::fdisk::Fdisk::device_count_cylinders)                                                                                                                   |
+//! | [`fdisk_get_geom_heads`][21]            | [`Fdisk::device_count_heads`](crate::fdisk::Fdisk::device_count_heads)                                                                                                                           |
+//! | [`fdisk_get_geom_sectors`][22]          | [`Fdisk::device_count_sectors`](crate::fdisk::Fdisk::device_count_sectors)                                                                                                                       |
+//! | [`fdisk_get_grain_size`][23]            | [`Fdisk::device_grain_size`](crate::fdisk::Fdisk::device_grain_size)                                                                                                                     |
+//! | [`fdisk_get_last_lba`][24]              | [`Fdisk::device_last_lba`](crate::fdisk::Fdisk::device_last_lba)                                                                                                                                 |
+//! | [`fdisk_get_minimal_iosize`][25]        | [`Fdisk::device_minimum_io_size`](crate::fdisk::Fdisk::device_minimum_io_size)                                                                                                                   |
+//! | [`fdisk_get_nsectors`][26]              | [`Fdisk::device_size_in_sectors`](crate::fdisk::Fdisk::device_size_in_sectors)                                                                                                                   |
+//! | [`fdisk_get_optimal_iosize`][27]        | [`Fdisk::device_optimal_io_size`](crate::fdisk::Fdisk::device_optimal_io_size)                                                                                                                   |
+//! | [`fdisk_get_parent`][28]                | [`Fdisk::parent_partitioner`](crate::fdisk::Fdisk::parent_partitioner)                                                                                                                           |
+//! | [`fdisk_get_physector_size`][29]        | [`Fdisk::device_bytes_per_physical_sector`](crate::fdisk::Fdisk::device_bytes_per_physical_sector)                                                                                               |
+//! | [`fdisk_get_sector_size`][30]           | [`Fdisk::device_bytes_per_logical_sector`](crate::fdisk::Fdisk::device_bytes_per_logical_sector)                                                                                                 |
+//! | [`fdisk_get_size_unit`][31]             | [`Fdisk::partition_size_format`](crate::fdisk::Fdisk::partition_size_format)                                                                                                                     |
+//! | [`fdisk_get_unit`][32]                  | [`Fdisk::displayed_unit_singular`](crate::fdisk::Fdisk::displayed_unit_singular)<br>[`Fdisk::displayed_unit_plural`](crate::fdisk::Fdisk::displayed_unit_plural)                                 |
+//! | [`fdisk_get_units_per_sector`][33]      | [`Fdisk::sectors_per_cylinder`](crate::fdisk::Fdisk::sectors_per_cylinder)                                                                                                                       |
+//! | [`fdisk_has_dialogs`][34]               | [`Fdisk::is_partitioning_interactive`](crate::fdisk::Fdisk::is_partitioning_interactive)                                                                                                         |
+//! | [`fdisk_has_label`][35]                 | [`Fdisk::device_has_partition_table`](crate::fdisk::Fdisk::device_has_partition_table)                                                                                                           |
+//! | [`fdisk_has_protected_bootbits`][36]    | [`Fdisk::protects_master_boot_record`](crate::fdisk::Fdisk::protects_master_boot_record)                                                                                                         |
+//! | [`fdisk_has_wipe`][37]                  | [`Fdisk::wipes_device_metadata`](crate::fdisk::Fdisk::wipes_device_metadata)                                                                                                                     |
+//! | [`fdisk_is_details`][38]                | [`Fdisk::displays_partition_details`](crate::fdisk::Fdisk::displays_partition_details)                                                                                                           |
+//! | [`fdisk_is_labeltype`][39]              |                                                                                                                                                                                                  |
+//! | [`fdisk_is_listonly`][40]               | [`Fdisk::displays_partition_list_only`](crate::fdisk::Fdisk::displays_partition_list_only)                                                                                                       |
+//! | [`fdisk_is_ptcollision`][41]            | [`Fdisk::device_has_collisions`](crate::fdisk::Fdisk::device_has_collisions)                                                                                                                     |
+//! | [`fdisk_is_readonly`][42]               | [`Fdisk::device_is_read_only`](crate::fdisk::Fdisk::device_is_read_only)                                                                                                                         |
+//! | [`fdisk_is_regfile`][43]                | [`Fdisk::device_is_image_file`](crate::fdisk::Fdisk::device_is_image_file)                                                                                                                       |
+//! | [`fdisk_new_context`][44]               | [`Fdisk::builder`](crate::fdisk::Fdisk::builder)                                                                                                                                                 |
+//! | [`fdisk_new_nested_context`][45]        | [`Fdisk::create_nested_partitioner`](crate::fdisk::Fdisk::create_nested_partitioner)<br>[`Fdisk::create_nested_partitioner_with_name`](crate::fdisk::Fdisk::create_nested_partitioner_with_name) |
+//! | [`fdisk_ref_context`][46]               | Managed automatically.                                                                                                                                                                           |
+//! | [`fdisk_reread_changes`][47]            |                                                                                                                                                                                                  |
+//! | [`fdisk_reread_partition_table`][48]    | [`Fdisk::reread_partition_entries`](crate::fdisk::Fdisk::reread_partition_entries)                                                                                                               |
+//! | [`fdisk_set_first_lba`][49]             | [`Fdisk::device_set_first_lba`](crate::fdisk::Fdisk::device_set_first_lba)                                                                                                                       |
+//! | [`fdisk_set_last_lba`][50]              | [`Fdisk::device_set_last_lba`](crate::fdisk::Fdisk::device_set_last_lba)                                                                                                                         |
+//! | [`fdisk_set_size_unit`][51]             | [`FdiskBuilder::partition_size_format`](crate::fdisk::FdiskBuilder::partition_size_format)                                                                                                       |
+//! | [`fdisk_set_unit`][52]                  | [`FdiskBuilder::device_addressing`](crate::fdisk::FdiskBuilder::device_addressing)                                                                                                               |
+//! | [`fdisk_unref_context`][53]             | [`Fdisk`](crate::fdisk::Fdisk) is automatically deallocated when it goes out of scope.                                                                                                           |
+//! | [`fdisk_use_cylinders`][54]             | [`Fdisk::displays_metadata_in_cylinders`](crate::fdisk::Fdisk::displays_metadata_in_cylinders)                                                                                                   |
 //!
 //! [1]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Context.html#fdisk-context
 //! [2]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Context.html#fdisk-assign-device
@@ -174,9 +174,9 @@
 //! | ------------------                        | ---------                                                                                                                                                                            |
 //! | [`struct fdisk_ask`][55]                  | [`Prompt`](crate::core::prompt::Prompt)                                                                                                                                              |
 //! | [`enum   fdisk_asktype`][56]              | [`PromptKind`](crate::core::prompt::PromptKind)                                                                                                                                      |
-//! | [`fdisk_info`][57]                        |                                                                                                                                                                                      |
-//! | [`fdisk_warn`][58]                        |                                                                                                                                                                                      |
-//! | [`fdisk_warnx`][59]                       |                                                                                                                                                                                      |
+//! | [`fdisk_info`][57]                        | [`Fdisk::log_info`](crate::fdisk::Fdisk::log_info)                                                                                                                                   |
+//! | [`fdisk_warn`][58]                        | [`Fdisk::log_warn_set_errno`](crate::fdisk::Fdisk::log_warn_set_errno)                                                                                                               |
+//! | [`fdisk_warnx`][59]                       | [`Fdisk::log_warn`](crate::fdisk::Fdisk::log_warn)                                                                                                                                   |
 //! | [`fdisk_set_ask`][60]                     | TBD                                                                                                                                                                                  |
 //! | [`fdisk_is_ask`][61]                      | [`Prompt::is_of_kind`](crate::core::prompt::Prompt::is_of_kind)                                                                                                                      |
 //! | [`fdisk_ask_get_query`][62]               | [`Prompt::query`](crate::core::prompt::Prompt::query)                                                                                                                                |
