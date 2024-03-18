@@ -8,7 +8,7 @@ use thiserror::Error;
 
 // From this library
 
-/// `Fdisk` runtime errors.
+/// [`Fdisk`](crate::fdisk::Fdisk) runtime errors.
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum FdiskError {}

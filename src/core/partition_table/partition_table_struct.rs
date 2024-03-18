@@ -587,8 +587,8 @@ impl PartitionTable {
     }
 
     /// `PartitionTable` keeps track of changes, so calling this function is not required unless
-    /// you want to force an `Fdisk` instance to use the current state of this `PartitionTable`
-    /// when writing data to disk.
+    /// you want to force an [`Fdisk`](crate::fdisk::Fdisk) instance to use the current state of
+    /// this `PartitionTable` when writing data to disk.
     pub fn mark_as_changed(&mut self) {
         log::debug!("PartitionTable::mark_as_changed marking partition table as changed");
 

@@ -8,7 +8,7 @@ use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 // From this library
 
-/// Kinds of prompt displayed by an `Fdisk` object.
+/// Kinds of prompt displayed by an [`Fdisk`](crate::fdisk::Fdisk) object.
 #[derive(Clone, Copy, Debug, Eq, IntoPrimitive, PartialEq, TryFromPrimitive)]
 #[repr(u32)]
 #[non_exhaustive]
