@@ -46,7 +46,7 @@
 //! tables,
 //! - `core`: the module holding specialised objects used and/or returned by `Fdisk`.
 //!
-//! Finally, look to the `debug` module if you need diagnostics during development.
+//! Finally, look to the [`debug`] module if you need diagnostics during development.
 //!
 //! ## From `libfdisk` to `rsfdisk`
 //!
@@ -769,9 +769,9 @@
 //!
 //! #### Library initialization
 //!
-//! | `libfdisk`                | `rsfdisk` |
-//! | ------------------        | --------- |
-//! | [`fdisk_init_debug`][306] |           |
+//! | `libfdisk`                | `rsfdisk`                                                   |
+//! | ------------------        | ---------                                                   |
+//! | [`fdisk_init_debug`][306] | [`debug::init_default_debug`]<br>[`debug::init_full_debug`] |
 //!
 //! [306]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Library-initialization.html#fdisk-init-debug
 //!
@@ -797,5 +797,6 @@
 
 pub use error::*;
 
+pub mod debug;
 mod error;
 pub(crate) mod ffi_utils;
