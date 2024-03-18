@@ -794,3 +794,7 @@
 //! [311]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Version-functions.html#fdisk-parse-version-string
 //! [312]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Version-functions.html#fdisk-get-library-version
 //! [313]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Version-functions.html#fdisk-get-library-features
+
+pub use error::*;
+
+mod error;
