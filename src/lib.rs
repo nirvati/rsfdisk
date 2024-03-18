@@ -798,3 +798,4 @@
 pub use error::*;
 
 mod error;
+pub(crate) mod ffi_utils;
