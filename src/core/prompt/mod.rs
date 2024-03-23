@@ -11,6 +11,8 @@
 
 pub use menu_item_struct::MenuItem;
 pub use prompt_kind_enum::PromptKind;
+pub use prompt_struct::Prompt;
 
 mod menu_item_struct;
 mod prompt_kind_enum;
+mod prompt_struct;

@@ -170,45 +170,45 @@
 //!
 //! #### Ask
 //!
-//! | `libfdisk`                                | `rsfdisk`                                       |
-//! | ------------------                        | ---------                                       |
-//! | [`struct fdisk_ask`][55]                  |                                                 |
-//! | [`enum   fdisk_asktype`][56]              | [`PromptKind`](crate::core::prompt::PromptKind) |
-//! | [`fdisk_info`][57]                        |                                                 |
-//! | [`fdisk_warn`][58]                        |                                                 |
-//! | [`fdisk_warnx`][59]                       |                                                 |
-//! | [`fdisk_set_ask`][60]                     |                                                 |
-//! | [`fdisk_is_ask`][61]                      |                                                 |
-//! | [`fdisk_ask_get_query`][62]               |                                                 |
-//! | [`fdisk_ask_get_type`][63]                |                                                 |
-//! | [`fdisk_ask_menu_get_default`][64]        |                                                 |
-//! | [`fdisk_ask_menu_get_item`][65]           |                                                 |
-//! | [`fdisk_ask_menu_get_nitems`][66]         |                                                 |
-//! | [`fdisk_ask_menu_get_result`][67]         |                                                 |
-//! | [`fdisk_ask_menu_set_result`][68]         |                                                 |
-//! | [`fdisk_ask_number`][69]                  |                                                 |
-//! | [`fdisk_ask_number_get_base`][70]         |                                                 |
-//! | [`fdisk_ask_number_get_default`][71]      |                                                 |
-//! | [`fdisk_ask_number_get_high`][72]         |                                                 |
-//! | [`fdisk_ask_number_get_low`][73]          |                                                 |
-//! | [`fdisk_ask_number_get_range`][74]        |                                                 |
-//! | [`fdisk_ask_number_get_result`][75]       |                                                 |
-//! | [`fdisk_ask_number_get_unit`][76]         |                                                 |
-//! | [`fdisk_ask_number_inchars`][77]          |                                                 |
-//! | [`fdisk_ask_number_is_wrap_negative`][78] |                                                 |
-//! | [`fdisk_ask_number_set_relative`][79]     |                                                 |
-//! | [`fdisk_ask_number_set_result`][80]       |                                                 |
-//! | [`fdisk_ask_partnum`][81]                 |                                                 |
-//! | [`fdisk_ask_print_get_errno`][82]         |                                                 |
-//! | [`fdisk_ask_print_get_mesg`][83]          |                                                 |
-//! | [`fdisk_ask_string`][84]                  |                                                 |
-//! | [`fdisk_ask_string_get_result`][85]       |                                                 |
-//! | [`fdisk_ask_string_set_result`][86]       |                                                 |
-//! | [`fdisk_ask_yesno`][87]                   |                                                 |
-//! | [`fdisk_ask_yesno_get_result`][88]        |                                                 |
-//! | [`fdisk_ask_yesno_set_result`][89]        |                                                 |
-//! | [`fdisk_ref_ask`][90]                     |                                                 |
-//! | [`fdisk_unref_ask`][91]                   |                                                 |
+//! | `libfdisk`                                | `rsfdisk`                                                                                                                                                                            |
+//! | ------------------                        | ---------                                                                                                                                                                            |
+//! | [`struct fdisk_ask`][55]                  | [`Prompt`](crate::core::prompt::Prompt)                                                                                                                                              |
+//! | [`enum   fdisk_asktype`][56]              | [`PromptKind`](crate::core::prompt::PromptKind)                                                                                                                                      |
+//! | [`fdisk_info`][57]                        |                                                                                                                                                                                      |
+//! | [`fdisk_warn`][58]                        |                                                                                                                                                                                      |
+//! | [`fdisk_warnx`][59]                       |                                                                                                                                                                                      |
+//! | [`fdisk_set_ask`][60]                     | TBD                                                                                                                                                                                  |
+//! | [`fdisk_is_ask`][61]                      | [`Prompt::is_of_kind`](crate::core::prompt::Prompt::is_of_kind)                                                                                                                      |
+//! | [`fdisk_ask_get_query`][62]               | [`Prompt::query`](crate::core::prompt::Prompt::query)                                                                                                                                |
+//! | [`fdisk_ask_get_type`][63]                | [`Prompt::kind`](crate::core::prompt::Prompt::kind)                                                                                                                                  |
+//! | [`fdisk_ask_menu_get_default`][64]        | [`Prompt::menu_default_key`](crate::core::prompt::Prompt::menu_default_key)                                                                                                          |
+//! | [`fdisk_ask_menu_get_item`][65]           | [`Prompt::menu_nth_item`](crate::core::prompt::Prompt::menu_nth_item)                                                                                                                |
+//! | [`fdisk_ask_menu_get_nitems`][66]         | [`Prompt::menu_count_items`](crate::core::prompt::Prompt::menu_count_items)                                                                                                          |
+//! | [`fdisk_ask_menu_get_result`][67]         | [`Prompt::menu_selected_item`](crate::core::prompt::Prompt::menu_selected_item)                                                                                                      |
+//! | [`fdisk_ask_menu_set_result`][68]         | [`Prompt::menu_item_select`](crate::core::prompt::Prompt::menu_item_select)                                                                                                          |
+//! | [`fdisk_ask_number`][69]                  |                                                                                                                                                                                      |
+//! | [`fdisk_ask_number_get_core`][70]         | [`Prompt::number_reference_point`](crate::core::prompt::Prompt::number_reference_point)                                                                                              |
+//! | [`fdisk_ask_number_get_default`][71]      | [`Prompt::number_default`](crate::core::prompt::Prompt::number_default)                                                                                                              |
+//! | [`fdisk_ask_number_get_high`][72]         | [`Prompt::number_upper_bound`](crate::core::prompt::Prompt::number_upper_bound)                                                                                                      |
+//! | [`fdisk_ask_number_get_low`][73]          | [`Prompt::number_lower_bound`](crate::core::prompt::Prompt::number_lower_bound)                                                                                                      |
+//! | [`fdisk_ask_number_get_range`][74]        | [`Prompt::number_range`](crate::core::prompt::Prompt::number_range)                                                                                                                  |
+//! | [`fdisk_ask_number_get_result`][75]       | [`Prompt::number_answer`](crate::core::prompt::Prompt::number_answer)                                                                                                                |
+//! | [`fdisk_ask_number_get_unit`][76]         | [`Prompt::number_bytes_per_unit`](crate::core::prompt::Prompt::number_bytes_per_unit)                                                                                                |
+//! | [`fdisk_ask_number_inchars`][77]          | [`Prompt::requires_lettered_partitions`](crate::core::prompt::Prompt::requires_lettered_partitions)                                                                                  |
+//! | [`fdisk_ask_number_is_wrap_negative`][78] | [`Prompt::accepts_negative_numbers`](crate::core::prompt::Prompt::accepts_negative_numbers)                                                                                          |
+//! | [`fdisk_ask_number_set_relative`][79]     | [`Prompt::number_enable_relative`](crate::core::prompt::Prompt::number_enable_relative)<br>[`Prompt::number_disable_relative`](crate::core::prompt::Prompt::number_disable_relative) |
+//! | [`fdisk_ask_number_set_result`][80]       | [`Prompt::number_set_answer`](crate::core::prompt::Prompt::number_set_answer)                                                                                                        |
+//! | [`fdisk_ask_partnum`][81]                 |                                                                                                                                                                                      |
+//! | [`fdisk_ask_print_get_errno`][82]         | [`Prompt::error_number`](crate::core::prompt::Prompt::error_number)                                                                                                                  |
+//! | [`fdisk_ask_print_get_mesg`][83]          | [`Prompt::error_message`](crate::core::prompt::Prompt::error_message)                                                                                                                |
+//! | [`fdisk_ask_string`][84]                  |                                                                                                                                                                                      |
+//! | [`fdisk_ask_string_get_result`][85]       | [`Prompt::string_answer`](crate::core::prompt::Prompt::string_answer)                                                                                                                |
+//! | [`fdisk_ask_string_set_result`][86]       | [`Prompt::string_set_answer`](crate::core::prompt::Prompt::string_set_answer)                                                                                                        |
+//! | [`fdisk_ask_yesno`][87]                   |                                                                                                                                                                                      |
+//! | [`fdisk_ask_yesno_get_result`][88]        | [`Prompt::yes_no_answer`](crate::core::prompt::Prompt::yes_no_answer)                                                                                                                |
+//! | [`fdisk_ask_yesno_set_result`][89]        | [`Prompt::yes_no_set_answer`](crate::core::prompt::Prompt::yes_no_set_answer)                                                                                                        |
+//! | [`fdisk_ref_ask`][90]                     | Managed automatically.                                                                                                                                                               |
+//! | [`fdisk_unref_ask`][91]                   | [`Prompt`](crate::core::prompt::Prompt) is automatically deallocated when it goes out of scope.                                                                                      |
 //!
 //! [55]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Ask.html#fdisk-ask
 //! [56]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Ask.html#fdisk-asktype
