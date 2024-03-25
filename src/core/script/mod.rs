@@ -8,3 +8,7 @@
 // From standard library
 
 // From this library
+
+pub use script_struct::Script;
+
+mod script_struct;

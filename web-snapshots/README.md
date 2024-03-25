@@ -43,6 +43,9 @@ These tools were essential for collecting copies:
 
 [Neat Rust Tricks: Passing Rust Closures to C][21] [[a]][22]
 
+[How can I write binding to a C function that expects an open file handle in
+Rust?][29] [[a]][30]
+
 ## Partition table/ partition
 
 [GUID Partition Table (GPT) Disk Layout][13] [[a]][14]
@@ -50,6 +53,8 @@ These tools were essential for collecting copies:
 [Partition type][17] [[a]][18]
 
 [GUID Partition Table][19] [[a]][20]
+
+[How to script sfdisk or parted for multiple partitions?][31] [[a]][32]
 
 ## File system
 
@@ -87,3 +92,7 @@ These tools were essential for collecting copies:
 [26]: web-snapshots/fs/read-and-write-BSD-label.html
 [27]: https://man.openbsd.org/disktab.5
 [28]: web-snapshots/fs/disktab-5-OpenBSD-manual-pages.html
+[29]: https://stackoverflow.com/questions/32484641/how-can-i-write-binding-to-a-c-function-that-expects-an-open-file-handle-in-rust/
+[30]: rust/ffi-rust-File-to-C-FILE.html
+[31]: https://stackoverflow.com/questions/12150116/how-to-script-sfdisk-or-parted-for-multiple-partitions
+[32]: web-snapshots/fdisk/sfdisk-script-structure.html

@@ -7,6 +7,10 @@
 
 // From standard library
 use std::ffi::{CStr, CString, NulError};
+use std::fs::File;
+use std::io;
+use std::mem::MaybeUninit;
+use std::os::fd::AsRawFd;
 use std::str::Utf8Error;
 
 // From this library
@@ -87,4 +91,40 @@ pub fn c_char_array_to_string(ptr: *const libc::c_char) -> String {
 
     // Get copy-on-write Cow<'_, str>, then guarantee a freshly-owned String allocation
     String::from_utf8_lossy(cstr.to_bytes()).to_string()
+}
+
+#[doc(hidden)]
+/// Associate a C FILE stream to a `File`'s underlying raw file descriptor.
+fn c_file_stream_from(file: &mut File, mode: &CStr) -> io::Result<*mut libc::FILE> {
+    unsafe {
+        let mut ptr = MaybeUninit::<*mut libc::FILE>::uninit();
+        ptr.write(libc::fdopen(file.as_raw_fd(), mode.as_ptr()));
+
+        match ptr.assume_init() {
+            ptr if ptr.is_null() => {
+                log::debug!("c_file_stream_from fdopen returned a NULL pointer");
+
+                Err(io::Error::last_os_error())
+            }
+            file_ptr => {
+                log::debug!("c_file_stream_from created FILE stream");
+
+                Ok(file_ptr)
+            }
+        }
+    }
+}
+
+#[doc(hidden)]
+/// Associate a write-only C FILE stream to a `File`'s underlying raw file descriptor.
+pub fn read_only_c_file_stream_from(file: &mut File) -> io::Result<*mut libc::FILE> {
+    let write_only = CString::new("r")?;
+    c_file_stream_from(file, write_only.as_c_str())
+}
+
+#[doc(hidden)]
+/// Associate a write-only C FILE stream to a `File`'s underlying raw file descriptor.
+pub fn write_only_c_file_stream_from(file: &mut File) -> io::Result<*mut libc::FILE> {
+    let write_only = CString::new("w")?;
+    c_file_stream_from(file, write_only.as_c_str())
 }

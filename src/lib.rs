@@ -278,31 +278,31 @@
 //!
 //! #### Script
 //!
-//! | `libfdisk`                            | `rsfdisk` |
-//! | ------------------                    | --------- |
-//! | [`struct fdisk_script`][103]          |           |
-//! | [`fdisk_set_script`][104]             |           |
-//! | [`fdisk_get_script`][105]             |           |
-//! | [`fdisk_apply_script`][106]           |           |
-//! | [`fdisk_apply_script_headers`][107]   |           |
-//! | [`fdisk_new_script`][108]             |           |
-//! | [`fdisk_new_script_from_file`][109]   |           |
-//! | [`fdisk_ref_script`][110]             |           |
-//! | [`fdisk_script_enable_json`][111]     |           |
-//! | [`fdisk_script_get_header`][112]      |           |
-//! | [`fdisk_script_get_nlines`][113]      |           |
-//! | [`fdisk_script_set_table`][114]       |           |
-//! | [`fdisk_script_get_table`][115]       |           |
-//! | [`fdisk_script_has_force_label`][116] |           |
-//! | [`fdisk_script_read_context`][117]    |           |
-//! | [`fdisk_script_read_file`][118]       |           |
-//! | [`fdisk_script_read_line`][119]       |           |
-//! | [`fdisk_script_set_header`][120]      |           |
-//! | [`fdisk_script_set_fgets`][121]       |           |
-//! | [`fdisk_script_write_file`][122]      |           |
-//! | [`fdisk_script_set_userdata`][123]    |           |
-//! | [`fdisk_script_get_userdata`][124]    |           |
-//! | [`fdisk_unref_script`][125]           |           |
+//! | `libfdisk`                            | `rsfdisk`                                                                                                                                                            |
+//! | ------------------                    | ---------                                                                                                                                                            |
+//! | [`struct fdisk_script`][103]          | [`Script`](crate::core::script::Script)                                                                                                                              |
+//! | [`fdisk_set_script`][104]             |                                                                                                                                                                      |
+//! | [`fdisk_get_script`][105]             |                                                                                                                                                                      |
+//! | [`fdisk_apply_script`][106]           |                                                                                                                                                                      |
+//! | [`fdisk_apply_script_headers`][107]   |                                                                                                                                                                      |
+//! | [`fdisk_new_script`][108]             |                                                                                                                                                                      |
+//! | [`fdisk_new_script_from_file`][109]   |                                                                                                                                                                      |
+//! | [`fdisk_ref_script`][110]             | Managed automatically.                                                                                                                                               |
+//! | [`fdisk_script_enable_json`][111]     | [`Script::enable_json_output`](crate::core::script::Script::enable_json_output)<br>[`Script::disable_json_output`](crate::core::script::Script::disable_json_output) |
+//! | [`fdisk_script_get_header`][112]      | [`Script::header_value`](crate::core::script::Script::header_value)                                                                                                  |
+//! | [`fdisk_script_get_nlines`][113]      | [`Script::count_lines`](crate::core::script::Script::count_lines)                                                                                                    |
+//! | [`fdisk_script_set_table`][114]       | [`Script::override_partition_table`](crate::core::script::Script::override_partition_table)                                                                          |
+//! | [`fdisk_script_get_table`][115]       | [`Script::partition_table_entries`](crate::core::script::Script::partition_table_entries)                                                                            |
+//! | [`fdisk_script_has_force_label`][116] | [`Script::has_header_label`](crate::core::script::Script::has_header_label)                                                                                          |
+//! | [`fdisk_script_read_context`][117]    | [`Script::compose_script`](crate::core::script::Script::compose_script)                                                                                              |
+//! | [`fdisk_script_read_file`][118]       | [`Script::import_file`](crate::core::script::Script::import_file)<br>[`Script::import_stream`](crate::core::script::Script::import_stream)                           |
+//! | [`fdisk_script_read_line`][119]       | [`Script::read_line`](crate::core::script::Script::read_line)                                                                                                        |
+//! | [`fdisk_script_set_header`][120]      | [`Script::add_header`](crate::core::script::Script::add_header)                                                                                                      |
+//! | [`fdisk_script_set_fgets`][121]       | [`Script::set_custom_read_line`](crate::core::script::Script::set_custom_read_line)                                                                                  |
+//! | [`fdisk_script_write_file`][122]      | [`Script::export_to_file`](crate::core::script::Script::export_to_file)<br>[`Script::export_to_stream`](crate::core::script::Script::export_to_stream)               |
+//! | [`fdisk_script_set_userdata`][123]    | Managed internally.                                                                                                                                                  |
+//! | [`fdisk_script_get_userdata`][124]    | Managed internally.                                                                                                                                                  |
+//! | [`fdisk_unref_script`][125]           | [`Script`](crate::core::script::Script) is automatically deallocated when it goes out of scope.                                                                      |
 //!
 //! [103]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Script.html#fdisk-script
 //! [104]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Script.html#fdisk-set-script
