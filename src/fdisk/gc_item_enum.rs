@@ -12,6 +12,7 @@
 pub(crate) enum GcItem {
     Partition(*mut *mut libfdisk::fdisk_partition),
     PartitionTable(*mut *mut libfdisk::fdisk_label),
+    Script(*mut *mut libfdisk::fdisk_script),
 }
 
 impl GcItem {
@@ -24,6 +25,9 @@ impl GcItem {
                 let _ = unsafe { Box::from_raw(boxed_ptr) };
             }
             Self::PartitionTable(boxed_ptr) => {
+                let _ = unsafe { Box::from_raw(boxed_ptr) };
+            }
+            Self::Script(boxed_ptr) => {
                 let _ = unsafe { Box::from_raw(boxed_ptr) };
             }
         }
@@ -39,5 +43,11 @@ impl From<*mut *mut libfdisk::fdisk_partition> for GcItem {
 impl From<*mut *mut libfdisk::fdisk_label> for GcItem {
     fn from(ptr: *mut *mut libfdisk::fdisk_label) -> GcItem {
         Self::PartitionTable(ptr)
+    }
+}
+
+impl From<*mut *mut libfdisk::fdisk_script> for GcItem {
+    fn from(ptr: *mut *mut libfdisk::fdisk_script) -> GcItem {
+        Self::Script(ptr)
     }
 }

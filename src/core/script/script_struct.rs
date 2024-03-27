@@ -7,6 +7,7 @@
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io;
+use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::os::fd::{FromRawFd, IntoRawFd};
 use std::path::Path;
@@ -14,17 +15,19 @@ use std::path::Path;
 // From this library
 use crate::core::errors::ScriptError;
 use crate::core::partition::PartitionList;
+use crate::fdisk::Fdisk;
 
 use crate::ffi_utils;
 
 /// `sfdisk`-compatible script.
 #[derive(Debug)]
 #[repr(transparent)]
-pub struct Script {
+pub struct Script<'fdisk> {
     pub(crate) inner: *mut libfdisk::fdisk_script,
+    _marker: PhantomData<&'fdisk Fdisk<'fdisk>>,
 }
 
-impl Script {
+impl<'fdisk> Script<'fdisk> {
     #[doc(hidden)]
     #[allow(dead_code)]
     /// Increments the script's reference counter.
@@ -61,6 +64,17 @@ impl Script {
         let entry_ref = unsafe { &mut *(raw_ptr as *mut Self) };
 
         (raw_ptr, entry_ref)
+    }
+
+    #[doc(hidden)]
+    /// Creates a new `Script` instance.
+    pub(crate) fn new(_: &'fdisk Fdisk, inner: *mut libfdisk::fdisk_script) -> Script<'fdisk> {
+        log::debug!("Script::new creating a new `Script` instance");
+
+        Self {
+            inner,
+            _marker: PhantomData,
+        }
     }
 
     #[doc(hidden)]
@@ -438,11 +452,18 @@ impl Script {
         }
     }
 
-    /// Composes a script that reflects the configuration of the `Fdisk` that created this `Script`.
+    /// Composes a script that reflects the configuration of the [`Fdisk`] that created this `Script`.
     pub fn compose_script(&mut self) -> Result<(), ScriptError> {
         log::debug!("Script::compose_script composing script from associated `Fdisk`");
 
         Self::read_context(self, std::ptr::null_mut())
+    }
+
+    /// Composes a `Script` that reflects the configuration of the referenced [`Fdisk`].
+    pub fn compose_script_from(&mut self, context: &Fdisk) -> Result<(), ScriptError> {
+        log::debug!("Script::compose_script composing script from external `Fdisk`");
+
+        Self::read_context(self, context.inner)
     }
 
     #[doc(hidden)]
@@ -556,14 +577,14 @@ impl Script {
     }
 }
 
-impl AsRef<Script> for Script {
+impl<'fdisk> AsRef<Script<'fdisk>> for Script<'fdisk> {
     #[inline]
-    fn as_ref(&self) -> &Script {
+    fn as_ref(&self) -> &Script<'fdisk> {
         self
     }
 }
 
-impl Drop for Script {
+impl<'fdisk> Drop for Script<'fdisk> {
     fn drop(&mut self) {
         log::debug!("Script::drop deallocating `Script` instance");
 

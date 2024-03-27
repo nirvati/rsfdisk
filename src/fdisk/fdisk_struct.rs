@@ -36,6 +36,8 @@ use crate::core::partition_table::PartitionTableKind;
 use crate::core::partition_table::TableSection;
 use crate::core::partition_table::VerificationStatus;
 
+use crate::core::script::Script;
+
 use crate::ffi_to_string_or_empty;
 use crate::ffi_utils;
 use crate::owning_mut_from_ptr;
@@ -1758,6 +1760,194 @@ impl<'a> Fdisk<'a> {
 
         state
     }
+
+    /// Creates an `sfdisk`-compatible [`Script`] associated with this `Fdisk`.
+    pub fn script_new(&self) -> Result<&mut Script, FdiskError> {
+        log::debug!("Fdisk::script_new creating a new `Script` instance");
+
+        let mut ptr = MaybeUninit::<*mut libfdisk::fdisk_script>::zeroed();
+        unsafe {
+            ptr.write(libfdisk::fdisk_new_script(self.inner));
+        }
+
+        match unsafe { ptr.assume_init() } {
+            ptr if ptr.is_null() => {
+                let err_msg = "failed to create a new `Script` instance".to_owned();
+                log::debug!(
+                    "Fdisk::script_new {}. libfdisk::fdisk_new_script returned a NULL pointer",
+                    err_msg
+                );
+
+                Err(FdiskError::Script(err_msg))
+            }
+            ptr => {
+                log::debug!("Fdisk::script_new created a new `Script` instance");
+                let script = owning_mut_from_ptr!(self, Script, ptr);
+
+                Ok(script)
+            }
+        }
+    }
+
+    /// Creates a new `sfdisk`-compatible [`Script`] associated with this `Fdisk` importing its
+    /// content from a file.
+    pub fn script_new_from_file<T>(&self, file_path: T) -> Result<&mut Script, FdiskError>
+    where
+        T: AsRef<Path>,
+    {
+        let file_path = file_path.as_ref();
+        let path = ffi_utils::as_ref_path_to_c_string(file_path)?;
+        log::debug!(
+            "Fdisk::script_new_from_file creating a new `Script` instance from: {:?}",
+            file_path
+        );
+
+        let mut ptr = MaybeUninit::<*mut libfdisk::fdisk_script>::zeroed();
+        unsafe {
+            ptr.write(libfdisk::fdisk_new_script_from_file(
+                self.inner,
+                path.as_ptr(),
+            ));
+        }
+
+        match unsafe { ptr.assume_init() } {
+            ptr if ptr.is_null() => {
+                let err_msg = format!(
+                    "failed to create a new `Script` instance from: {:?}",
+                    file_path
+                );
+                log::debug!("Fdisk::script_new_from_file {}. libfdisk::fdisk_new_script_from_file returned a NULL pointer", err_msg);
+
+                Err(FdiskError::Script(err_msg))
+            }
+            ptr => {
+                log::debug!(
+                    "Fdisk::script_new_from_file created a new `Script` instance from: {:?}",
+                    file_path
+                );
+                let script = owning_mut_from_ptr!(self, Script, ptr);
+
+                Ok(script)
+            }
+        }
+    }
+
+    /// Applies the provided [`Script`] to this `Fdisk` to create the in-memory partition
+    /// table, and partitions its content specifies.
+    ///
+    /// To write the changes to disk call [`Fdisk::partition_table_write_to_disk`].
+    pub fn script_apply(&mut self, script: &Script) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::script_apply applying script");
+
+        // Internally `fdisk_apply_script` calls `fdisk_apply_script_headers` on `script.inner`
+        // see https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/script.c#L1621
+        //
+        // > which in turn will call `fdisk_set_script`
+        // see https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/script.c#L1541
+        //
+        // >> `set_script` will set `script.inner` as the current associated Script
+        // https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/script.c#L1500
+        //
+        // then `fdisk_apply_script` will restore the old script as the current one by calling
+        // `set_script` which will incidentally decrement the reference counter of `script.inner'
+        // and leave us with a dangling pointer.
+        // https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/script.c#L1496`
+        //
+        // To prevent this outcome, we increment the reference counter of `script.inner` before using it as a countermeasure.
+        unsafe {
+            libfdisk::fdisk_ref_script(script.inner);
+        }
+
+        let result = unsafe { libfdisk::fdisk_apply_script(self.inner, script.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::script_apply applied script");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to apply script".to_owned();
+                log::debug!("Fdisk::script_apply {}. libfdisk::fdisk_apply_script returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    // FIXME a script retains a pointer to the context it was created from
+    // https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/script.c#L103
+    // a new assignment here does not update this reference. Furthermore, calling this function
+    // can create a shared ownership of the same script between `fdisk_context` structures. How does this impact Rust ownership
+    // constraints?
+    //
+    // - Each value in Rust has an owner.
+    // - There can only be one owner at a time.
+    // - When the owner goes out of scope, the value will be dropped.
+
+    /// Associates a [`Script`] to this `Fdisk`, then applies it to create the in-memory partition
+    /// table it specifies.
+    ///
+    /// FIXME as is, this function is unusable since there is currently no way to pass it a fully
+    /// owned [`Script`]. More information from developers upstream is needed for me to come up
+    /// with a better API design. To be clear, it is **MY** lack of knowledge about the code produced
+    /// upstream that is at fault here, **NOT** the developers of `libfdisk`. In the meantime... ¯\\\_(ツ)\_/¯
+    pub fn script_apply_headers(&mut self, mut script: Script) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::script_apply_headers applying script headers");
+
+        // We are virtually ceding ownership of this instance to the C-side of the library;
+        // instance that will be automatically deallocated once it is out of scope, incrementing
+        // its reference counter protects it from being freed prematurely.
+        script.incr_ref_counter();
+
+        let result = unsafe { libfdisk::fdisk_apply_script_headers(self.inner, script.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::script_apply_headers applied script headers");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to apply script headers".to_owned();
+                log::debug!("Fdisk::script_apply_headers {}. libfdisk::fdisk_apply_script_headers returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Sets/unsets which [`Script`] a `Fdisk` is associated with.
+    fn set_script(ptr: &mut Self, script: *mut libfdisk::fdisk_script) -> Result<(), FdiskError> {
+        let result = unsafe { libfdisk::fdisk_set_script(ptr.inner, script) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::set_script script set");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to set script".to_owned();
+                log::debug!(
+                    "Fdisk::set_script {}. libfdisk::fdisk_set_script returned error code: {:?}",
+                    err_msg,
+                    code
+                );
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Removes the [`Script`] currently associated with this `Fdisk`.
+    pub fn script_dissociate(&mut self) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::script_dissociate dissociating script");
+
+        Self::set_script(self, std::ptr::null_mut())
+    }
+
     //---- END mutators
 
     //---- BEGIN getters
@@ -2830,6 +3020,62 @@ impl<'a> Fdisk<'a> {
             .collect::<Vec<_>>();
 
         Ok(formats)
+    }
+
+    /// Returns a reference to the [`Script`] currently associated with this `Fdisk`.
+    pub fn script(&self) -> Option<&Script> {
+        log::debug!("Fdisk::script getting currently linked `Script` instance");
+
+        let mut ptr = MaybeUninit::<*mut libfdisk::fdisk_script>::zeroed();
+        unsafe {
+            ptr.write(libfdisk::fdisk_get_script(self.inner));
+        }
+
+        match unsafe { ptr.assume_init() } {
+            ptr if ptr.is_null() => {
+                let err_msg = "got no currently linked script".to_owned();
+                log::debug!(
+                    "Fdisk::script {}. libfdisk::fdisk_get_script returned a NULL pointer",
+                    err_msg
+                );
+
+                None
+            }
+            ptr => {
+                log::debug!("Fdisk::script got currently linked `Script`");
+                let script = owning_ref_from_ptr!(self, Script, ptr);
+
+                Some(script)
+            }
+        }
+    }
+
+    /// Returns a mutable reference to the [`Script`] currently associated with this `Fdisk`.
+    pub fn script_mut(&mut self) -> Option<&mut Script> {
+        log::debug!("Fdisk::script_mut getting currently linked `Script` instance");
+
+        let mut ptr = MaybeUninit::<*mut libfdisk::fdisk_script>::zeroed();
+        unsafe {
+            ptr.write(libfdisk::fdisk_get_script(self.inner));
+        }
+
+        match unsafe { ptr.assume_init() } {
+            ptr if ptr.is_null() => {
+                let err_msg = "got no currently linked script".to_owned();
+                log::debug!(
+                    "Fdisk::script_mut {}. libfdisk::fdisk_get_script returned a NULL pointer",
+                    err_msg
+                );
+
+                None
+            }
+            ptr => {
+                log::debug!("Fdisk::script_mut got currently linked `Script`");
+                let script = owning_mut_from_ptr!(self, Script, ptr);
+
+                Some(script)
+            }
+        }
     }
 
     //---- END getters

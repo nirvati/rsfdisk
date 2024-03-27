@@ -81,6 +81,10 @@ pub enum FdiskError {
     #[error("{0}")]
     Save(String),
 
+    /// [`Script`](crate::core::script::Script) runtime error.
+    #[error("{0}")]
+    Script(String),
+
     #[error("{0}")]
     Unexpected(String),
 }
