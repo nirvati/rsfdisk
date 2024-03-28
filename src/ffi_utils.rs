@@ -42,6 +42,29 @@ where
 }
 
 #[doc(hidden)]
+/// Converts a `const` [`c_char`](libc::c_char) C string to a byte slice.
+///
+///  # Safety
+///
+///  - Assumes the  memory pointed to by `ptr` contains a valid nul terminator at the end of the string.
+///
+///  - `ptr` must be valid for reads of bytes up to and including the null terminator. This means in particular:
+///      The entire memory range of the C string must be contained within a single allocated object!
+///      `ptr` must be non-null even for a zero-length `cstr`.
+///
+///  - The memory referenced by the returned CStr must not be mutated for the duration of lifetime 'a.
+///
+pub fn const_c_char_array_to_bytes<'a>(ptr: *const libc::c_char) -> &'a [u8] {
+    let cstr = unsafe { CStr::from_ptr(ptr) };
+    log::debug!(
+        "const_c_char_array_to_c_str converting `*const libc::c_char` to `[u8]`: {:?}",
+        cstr
+    );
+
+    cstr.to_bytes()
+}
+
+#[doc(hidden)]
 /// Converts a [`c_char`](libc::c_char) array to a &[`str`].
 pub fn const_char_array_to_str_ref<'a>(ptr: *const libc::c_char) -> Result<&'a str, Utf8Error> {
     let cstr = unsafe { CStr::from_ptr(ptr) };

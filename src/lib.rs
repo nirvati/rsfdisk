@@ -419,60 +419,60 @@
 //!
 //! #### Partition
 //!
-//! | `libfdisk`                                     | `rsfdisk`                                        |
-//! | ------------------                             | ---------                                        |
-//! | [`struct fdisk_partition`][167]                | [`Partition`](crate::core::partition::Partition) |
-//! | [`fdisk_add_partition`][168]                   |                                                  |
-//! | [`fdisk_delete_all_partitions`][169]           |                                                  |
-//! | [`fdisk_delete_partition`][170]                |                                                  |
-//! | [`fdisk_get_partition`][171]                   |                                                  |
-//! | [`fdisk_is_partition_used`][172]               |                                                  |
-//! | [`fdisk_set_partition`][173]                   |                                                  |
-//! | [`fdisk_wipe_partition`][174]                  |                                                  |
-//! | [`fdisk_new_partition`][175]                   |                                                  |
-//! | [`fdisk_partition_cmp_partno`][176]            |                                                  |
-//! | [`fdisk_partition_cmp_start`][177]             |                                                  |
-//! | [`fdisk_partition_end_follow_default`][178]    |                                                  |
-//! | [`fdisk_partition_end_is_default`][179]        |                                                  |
-//! | [`fdisk_partition_get_attrs`][180]             |                                                  |
-//! | [`fdisk_partition_get_end`][181]               |                                                  |
-//! | [`fdisk_partition_get_name`][182]              |                                                  |
-//! | [`fdisk_partition_get_parent`][183]            |                                                  |
-//! | [`fdisk_partition_get_partno`][184]            |                                                  |
-//! | [`fdisk_partition_get_size`][185]              |                                                  |
-//! | [`fdisk_partition_get_start`][186]             |                                                  |
-//! | [`fdisk_partition_get_type`][187]              |                                                  |
-//! | [`fdisk_partition_get_uuid`][188]              |                                                  |
-//! | [`fdisk_partition_has_end`][189]               |                                                  |
-//! | [`fdisk_partition_has_partno`][190]            |                                                  |
-//! | [`fdisk_partition_has_size`][191]              |                                                  |
-//! | [`fdisk_partition_has_start`][192]             |                                                  |
-//! | [`fdisk_partition_has_wipe`][193]              |                                                  |
-//! | [`fdisk_partition_is_bootable`][194]           |                                                  |
-//! | [`fdisk_partition_is_container`][195]          |                                                  |
-//! | [`fdisk_partition_is_freespace`][196]          |                                                  |
-//! | [`fdisk_partition_is_nested`][197]             |                                                  |
-//! | [`fdisk_partition_is_used`][198]               |                                                  |
-//! | [`fdisk_partition_is_wholedisk`][199]          |                                                  |
-//! | [`fdisk_partition_next_partno`][200]           |                                                  |
-//! | [`fdisk_partition_partno_follow_default`][201] |                                                  |
-//! | [`fdisk_partition_set_attrs`][202]             |                                                  |
-//! | [`fdisk_partition_set_name`][203]              |                                                  |
-//! | [`fdisk_partition_set_partno`][204]            |                                                  |
-//! | [`fdisk_partition_set_size`][205]              |                                                  |
-//! | [`fdisk_partition_set_start`][206]             |                                                  |
-//! | [`fdisk_partition_set_type`][207]              |                                                  |
-//! | [`fdisk_partition_set_uuid`][208]              |                                                  |
-//! | [`fdisk_partition_size_explicit`][209]         |                                                  |
-//! | [`fdisk_partition_start_follow_default`][210]  |                                                  |
-//! | [`fdisk_partition_start_is_default`][211]      |                                                  |
-//! | [`fdisk_partition_to_string`][212]             |                                                  |
-//! | [`fdisk_partition_unset_partno`][213]          |                                                  |
-//! | [`fdisk_partition_unset_size`][214]            |                                                  |
-//! | [`fdisk_partition_unset_start`][215]           |                                                  |
-//! | [`fdisk_ref_partition`][216]                   |                                                  |
-//! | [`fdisk_reset_partition`][217]                 |                                                  |
-//! | [`fdisk_unref_partition`][218]                 |                                                  |
+//! | `libfdisk`                                     | `rsfdisk`                                                                                                                                                                                      |
+//! | ------------------                             | ---------                                                                                                                                                                                      |
+//! | [`struct fdisk_partition`][167]                | [`Partition`](crate::core::partition::Partition)                                                                                                                                               |
+//! | [`fdisk_add_partition`][168]                   |                                                                                                                                                                                                |
+//! | [`fdisk_delete_all_partitions`][169]           |                                                                                                                                                                                                |
+//! | [`fdisk_delete_partition`][170]                |                                                                                                                                                                                                |
+//! | [`fdisk_get_partition`][171]                   |                                                                                                                                                                                                |
+//! | [`fdisk_is_partition_used`][172]               |                                                                                                                                                                                                |
+//! | [`fdisk_set_partition`][173]                   |                                                                                                                                                                                                |
+//! | [`fdisk_wipe_partition`][174]                  |                                                                                                                                                                                                |
+//! | [`fdisk_new_partition`][175]                   | [`Partition::builder`](crate::core::partition::Partition::builder)                                                                                                                             |
+//! | [`fdisk_partition_cmp_partno`][176]            | [`Partition::compare_partition_numbers`](crate::core::partition::Partition::compare_partition_numbers)                                                                                         |
+//! | [`fdisk_partition_cmp_start`][177]             | [`Partition::compare_starting_sectors`](crate::core::partition::Partition::compare_starting_sectors)                                                                                           |
+//! | [`fdisk_partition_end_follow_default`][178]    | Managed internally by [`PartitionBuilder`](crate::core::partition::PartitionBuilder).                                                                                                          |
+//! | [`fdisk_partition_end_is_default`][179]        | [`Partition::uses_default_ending_sector`](crate::core::partition::Partition::uses_default_ending_sector)                                                                                       |
+//! | [`fdisk_partition_get_attrs`][180]             | [`Partition::attribute_bits`](crate::core::partition::Partition::attribute_bits)                                                                                                               |
+//! | [`fdisk_partition_get_end`][181]               | [`Partition::ending_sector`](crate::core::partition::Partition::ending_sector)                                                                                                                 |
+//! | [`fdisk_partition_get_name`][182]              | [`Partition::name`](crate::core::partition::Partition::name)                                                                                                                                   |
+//! | [`fdisk_partition_get_parent`][183]            | [`Partition::parent_partition_number`](crate::core::partition::Partition::parent_partition_number)                                                                                             |
+//! | [`fdisk_partition_get_partno`][184]            | [`Partition::number`](crate::core::partition::Partition::number)                                                                                                                               |
+//! | [`fdisk_partition_get_size`][185]              | [`Partition::size_in_sectors`](crate::core::partition::Partition::size_in_sectors)                                                                                                             |
+//! | [`fdisk_partition_get_start`][186]             | [`Partition::starting_sector`](crate::core::partition::Partition::starting_sector)                                                                                                             |
+//! | [`fdisk_partition_get_type`][187]              | [`Partition::partition_type`](crate::core::partition::Partition::partition_type)                                                                                                               |
+//! | [`fdisk_partition_get_uuid`][188]              | [`Partition::uuid`](crate::core::partition::Partition::uuid)                                                                                                                                   |
+//! | [`fdisk_partition_has_end`][189]               | Redundant since we return [`Option::None`] when the value is not set.                                                                                                                          |
+//! | [`fdisk_partition_has_partno`][190]            | Redundant since we return [`Option::None`] when the value is not set.                                                                                                                          |
+//! | [`fdisk_partition_has_size`][191]              | Redundant since we return [`Option::None`] when the value is not set.                                                                                                                          |
+//! | [`fdisk_partition_has_start`][192]             | Redundant since we return [`Option::None`] when the value is not set.                                                                                                                          |
+//! | [`fdisk_partition_has_wipe`][193]              |                                                                                                                                                                                                |
+//! | [`fdisk_partition_is_bootable`][194]           | [`Partition::is_bootable`](crate::core::partition::Partition::is_bootable)                                                                                                                     |
+//! | [`fdisk_partition_is_container`][195]          | [`Partition::is_container`](crate::core::partition::Partition::is_container)                                                                                                                   |
+//! | [`fdisk_partition_is_freespace`][196]          | [`Partition::is_free_space`](crate::core::partition::Partition::is_free_space)                                                                                                                 |
+//! | [`fdisk_partition_is_nested`][197]             | [`Partition::is_nested`](crate::core::partition::Partition::is_nested)                                                                                                                         |
+//! | [`fdisk_partition_is_used`][198]               | [`Partition::points_to_used_area`](crate::core::partition::Partition::points_to_used_area)                                                                                                     |
+//! | [`fdisk_partition_is_wholedisk`][199]          | [`Partition::is_whole_disk`](crate::core::partition::Partition::is_whole_disk)                                                                                                                 |
+//! | [`fdisk_partition_next_partno`][200]           |                                                                                                                                                                                                |
+//! | [`fdisk_partition_partno_follow_default`][201] | Managed internally by [`PartitionBuilder`](crate::core::partition::PartitionBuilder).                                                                                                          |
+//! | [`fdisk_partition_set_attrs`][202]             | [`PartitionBuilder::attribute_bits`](crate::core::partition::PartitionBuilder::attribute_bits)                                                                                                 |
+//! | [`fdisk_partition_set_name`][203]              | [`PartitionBuilder::name`](crate::core::partition::PartitionBuilder::name)                                                                                                                     |
+//! | [`fdisk_partition_set_partno`][204]            | [`PartitionBuilder::number`](crate::core::partition::PartitionBuilder::number)<br>[`Partition::set_partition_number`](crate::core::partition::Partition::set_partition_number)                 |
+//! | [`fdisk_partition_set_size`][205]              | [`PartitionBuilder::size_in_sectors`](crate::core::partition::PartitionBuilder::size_in_sectors)<br>[`Partition::set_size_in_sectors`](crate::core::partition::Partition::set_size_in_sectors) |
+//! | [`fdisk_partition_set_start`][206]             | [`PartitionBuilder::starting_sector`](crate::core::partition::PartitionBuilder::starting_sector)<br>[`Partition::set_starting_sector`](crate::core::partition::Partition::set_starting_sector) |
+//! | [`fdisk_partition_set_type`][207]              | [`PartitionBuilder::partition_type`](crate::core::partition::PartitionBuilder::partition_type)                                                                                                 |
+//! | [`fdisk_partition_set_uuid`][208]              | [`PartitionBuilder::uuid`](crate::core::partition::PartitionBuilder::uuid)                                                                                                                     |
+//! | [`fdisk_partition_size_explicit`][209]         | [`PartitionBuilder::ask_size_interactive`](crate::core::partition::PartitionBuilder::ask_size_interactive)                                                                                     |
+//! | [`fdisk_partition_start_follow_default`][210]  | Managed internally by [`PartitionBuilder`](crate::core::partition::PartitionBuilder).                                                                                                          |
+//! | [`fdisk_partition_start_is_default`][211]      | [`Partition::uses_default_starting_sector`](crate::core::partition::Partition::uses_default_starting_sector)                                                                                   |
+//! | [`fdisk_partition_to_string`][212]             |                                                                                                                                                                                                |
+//! | [`fdisk_partition_unset_partno`][213]          | [`Partition::unset_partition_number`](crate::core::partition::Partition::unset_partition_number)                                                                                               |
+//! | [`fdisk_partition_unset_size`][214]            | [`Partition::unset_size_in_sectors`](crate::core::partition::Partition::unset_size_in_sectors)                                                                                                 |
+//! | [`fdisk_partition_unset_start`][215]           | [`Partition::unset_starting_sector`](crate::core::partition::Partition::unset_starting_sector)                                                                                                 |
+//! | [`fdisk_ref_partition`][216]                   | Managed automatically.                                                                                                                                                                         |
+//! | [`fdisk_reset_partition`][217]                 | Not implemented.                                                                                                                                                                               |
+//! | [`fdisk_unref_partition`][218]                 | [`Partition`](crate::core::partition::Partition) is automatically deallocated when it goes out of scope.                                                                                       |
 //!
 //! [167]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Partition.html#fdisk-partition
 //! [168]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Partition.html#fdisk-add-partition
