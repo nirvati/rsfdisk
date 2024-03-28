@@ -8,7 +8,7 @@ use thiserror::Error;
 
 // From this library
 
-/// `Partition` runtime errors.
+/// [`Partition`](crate::core::partition::Partition) runtime errors.
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum PartitionError {}

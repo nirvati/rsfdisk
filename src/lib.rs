@@ -419,60 +419,60 @@
 //!
 //! #### Partition
 //!
-//! | `libfdisk`                                     | `rsfdisk` |
-//! | ------------------                             | --------- |
-//! | [`struct fdisk_partition`][167]                |           |
-//! | [`fdisk_add_partition`][168]                   |           |
-//! | [`fdisk_delete_all_partitions`][169]           |           |
-//! | [`fdisk_delete_partition`][170]                |           |
-//! | [`fdisk_get_partition`][171]                   |           |
-//! | [`fdisk_is_partition_used`][172]               |           |
-//! | [`fdisk_set_partition`][173]                   |           |
-//! | [`fdisk_wipe_partition`][174]                  |           |
-//! | [`fdisk_new_partition`][175]                   |           |
-//! | [`fdisk_partition_cmp_partno`][176]            |           |
-//! | [`fdisk_partition_cmp_start`][177]             |           |
-//! | [`fdisk_partition_end_follow_default`][178]    |           |
-//! | [`fdisk_partition_end_is_default`][179]        |           |
-//! | [`fdisk_partition_get_attrs`][180]             |           |
-//! | [`fdisk_partition_get_end`][181]               |           |
-//! | [`fdisk_partition_get_name`][182]              |           |
-//! | [`fdisk_partition_get_parent`][183]            |           |
-//! | [`fdisk_partition_get_partno`][184]            |           |
-//! | [`fdisk_partition_get_size`][185]              |           |
-//! | [`fdisk_partition_get_start`][186]             |           |
-//! | [`fdisk_partition_get_type`][187]              |           |
-//! | [`fdisk_partition_get_uuid`][188]              |           |
-//! | [`fdisk_partition_has_end`][189]               |           |
-//! | [`fdisk_partition_has_partno`][190]            |           |
-//! | [`fdisk_partition_has_size`][191]              |           |
-//! | [`fdisk_partition_has_start`][192]             |           |
-//! | [`fdisk_partition_has_wipe`][193]              |           |
-//! | [`fdisk_partition_is_bootable`][194]           |           |
-//! | [`fdisk_partition_is_container`][195]          |           |
-//! | [`fdisk_partition_is_freespace`][196]          |           |
-//! | [`fdisk_partition_is_nested`][197]             |           |
-//! | [`fdisk_partition_is_used`][198]               |           |
-//! | [`fdisk_partition_is_wholedisk`][199]          |           |
-//! | [`fdisk_partition_next_partno`][200]           |           |
-//! | [`fdisk_partition_partno_follow_default`][201] |           |
-//! | [`fdisk_partition_set_attrs`][202]             |           |
-//! | [`fdisk_partition_set_name`][203]              |           |
-//! | [`fdisk_partition_set_partno`][204]            |           |
-//! | [`fdisk_partition_set_size`][205]              |           |
-//! | [`fdisk_partition_set_start`][206]             |           |
-//! | [`fdisk_partition_set_type`][207]              |           |
-//! | [`fdisk_partition_set_uuid`][208]              |           |
-//! | [`fdisk_partition_size_explicit`][209]         |           |
-//! | [`fdisk_partition_start_follow_default`][210]  |           |
-//! | [`fdisk_partition_start_is_default`][211]      |           |
-//! | [`fdisk_partition_to_string`][212]             |           |
-//! | [`fdisk_partition_unset_partno`][213]          |           |
-//! | [`fdisk_partition_unset_size`][214]            |           |
-//! | [`fdisk_partition_unset_start`][215]           |           |
-//! | [`fdisk_ref_partition`][216]                   |           |
-//! | [`fdisk_reset_partition`][217]                 |           |
-//! | [`fdisk_unref_partition`][218]                 |           |
+//! | `libfdisk`                                     | `rsfdisk`                                        |
+//! | ------------------                             | ---------                                        |
+//! | [`struct fdisk_partition`][167]                | [`Partition`](crate::core::partition::Partition) |
+//! | [`fdisk_add_partition`][168]                   |                                                  |
+//! | [`fdisk_delete_all_partitions`][169]           |                                                  |
+//! | [`fdisk_delete_partition`][170]                |                                                  |
+//! | [`fdisk_get_partition`][171]                   |                                                  |
+//! | [`fdisk_is_partition_used`][172]               |                                                  |
+//! | [`fdisk_set_partition`][173]                   |                                                  |
+//! | [`fdisk_wipe_partition`][174]                  |                                                  |
+//! | [`fdisk_new_partition`][175]                   |                                                  |
+//! | [`fdisk_partition_cmp_partno`][176]            |                                                  |
+//! | [`fdisk_partition_cmp_start`][177]             |                                                  |
+//! | [`fdisk_partition_end_follow_default`][178]    |                                                  |
+//! | [`fdisk_partition_end_is_default`][179]        |                                                  |
+//! | [`fdisk_partition_get_attrs`][180]             |                                                  |
+//! | [`fdisk_partition_get_end`][181]               |                                                  |
+//! | [`fdisk_partition_get_name`][182]              |                                                  |
+//! | [`fdisk_partition_get_parent`][183]            |                                                  |
+//! | [`fdisk_partition_get_partno`][184]            |                                                  |
+//! | [`fdisk_partition_get_size`][185]              |                                                  |
+//! | [`fdisk_partition_get_start`][186]             |                                                  |
+//! | [`fdisk_partition_get_type`][187]              |                                                  |
+//! | [`fdisk_partition_get_uuid`][188]              |                                                  |
+//! | [`fdisk_partition_has_end`][189]               |                                                  |
+//! | [`fdisk_partition_has_partno`][190]            |                                                  |
+//! | [`fdisk_partition_has_size`][191]              |                                                  |
+//! | [`fdisk_partition_has_start`][192]             |                                                  |
+//! | [`fdisk_partition_has_wipe`][193]              |                                                  |
+//! | [`fdisk_partition_is_bootable`][194]           |                                                  |
+//! | [`fdisk_partition_is_container`][195]          |                                                  |
+//! | [`fdisk_partition_is_freespace`][196]          |                                                  |
+//! | [`fdisk_partition_is_nested`][197]             |                                                  |
+//! | [`fdisk_partition_is_used`][198]               |                                                  |
+//! | [`fdisk_partition_is_wholedisk`][199]          |                                                  |
+//! | [`fdisk_partition_next_partno`][200]           |                                                  |
+//! | [`fdisk_partition_partno_follow_default`][201] |                                                  |
+//! | [`fdisk_partition_set_attrs`][202]             |                                                  |
+//! | [`fdisk_partition_set_name`][203]              |                                                  |
+//! | [`fdisk_partition_set_partno`][204]            |                                                  |
+//! | [`fdisk_partition_set_size`][205]              |                                                  |
+//! | [`fdisk_partition_set_start`][206]             |                                                  |
+//! | [`fdisk_partition_set_type`][207]              |                                                  |
+//! | [`fdisk_partition_set_uuid`][208]              |                                                  |
+//! | [`fdisk_partition_size_explicit`][209]         |                                                  |
+//! | [`fdisk_partition_start_follow_default`][210]  |                                                  |
+//! | [`fdisk_partition_start_is_default`][211]      |                                                  |
+//! | [`fdisk_partition_to_string`][212]             |                                                  |
+//! | [`fdisk_partition_unset_partno`][213]          |                                                  |
+//! | [`fdisk_partition_unset_size`][214]            |                                                  |
+//! | [`fdisk_partition_unset_start`][215]           |                                                  |
+//! | [`fdisk_ref_partition`][216]                   |                                                  |
+//! | [`fdisk_reset_partition`][217]                 |                                                  |
+//! | [`fdisk_unref_partition`][218]                 |                                                  |
 //!
 //! [167]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Partition.html#fdisk-partition
 //! [168]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Partition.html#fdisk-add-partition
