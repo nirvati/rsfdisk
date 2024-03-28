@@ -25,9 +25,17 @@ pub enum FdiskError {
     #[error("{0}")]
     Config(String),
 
+    /// Error while performing a conversion.
+    #[error("{0}")]
+    Conversion(String),
+
     /// Error while creating a new [`Fdisk`](crate::fdisk::Fdisk) instance.
     #[error("{0}")]
     Creation(String),
+
+    /// Error when prompts are disabled.
+    #[error("{0}")]
+    DialogsDisabled(String),
 
     /// Error while converting a value to [`CString`](std::ffi::CString).
     #[error("failed to convert value to `CString`: {}", .0)]
@@ -45,6 +53,14 @@ pub enum FdiskError {
     #[error("{0}")]
     Log(String),
 
+    /// Error when there is no more assignable partition number.
+    #[error("{0}")]
+    NoNextPartitionNumber(String),
+
+    /// Error when trying to allocate memory.
+    #[error("{0}")]
+    OutOfMemory(String),
+
     /// Error while overriding `Fdisk` attributes in memory.
     #[error("{0}")]
     Override(String),
@@ -57,7 +73,14 @@ pub enum FdiskError {
     #[error("{0}")]
     Restore(String),
 
+    /// Error if returned value is out of range.
+    #[error("{0}")]
+    ResultOutOfRange(String),
+
     /// Error while saving `Fdisk` attributes.
     #[error("{0}")]
     Save(String),
+
+    #[error("{0}")]
+    Unexpected(String),
 }

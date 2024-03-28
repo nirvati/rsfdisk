@@ -19,8 +19,14 @@ use crate::fdisk::GcItem;
 use crate::fdisk::LBAAlign;
 use crate::fdisk::SizeFormat;
 
+use crate::core::partition::Partition;
+
+use crate::core::partition_table::Field;
+
 use crate::ffi_to_string_or_empty;
 use crate::ffi_utils;
+use crate::owning_mut_from_ptr;
+use crate::owning_ref_from_ptr;
 
 /// Partition table reader/editor/creator.
 #[derive(Debug)]
@@ -1152,6 +1158,262 @@ impl<'a> Fdisk<'a> {
         }
     }
 
+    #[doc(hidden)]
+    /// Adds a new partition to the partition table to be created by this `Fdisk`.
+    fn add_partition(
+        ptr: *mut libfdisk::fdisk_context,
+        partition_ptr: *mut libfdisk::fdisk_partition,
+    ) -> Result<usize, FdiskError> {
+        let mut partition_number_ptr = MaybeUninit::<libc::size_t>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_add_partition(ptr, partition_ptr, partition_number_ptr.as_mut_ptr())
+        };
+
+        match result {
+            0 => {
+                let partition_number = unsafe { partition_number_ptr.assume_init() };
+                log::debug!(
+                    "Fdisk::add_partition added new partition numbered: {:?}",
+                    partition_number
+                );
+                Ok(partition_number)
+            }
+            code => {
+                let err_msg = "failed to add new partition".to_owned();
+                log::debug!("Fdisk::add_partition {}. libfdisk::fdisk_add_partition returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Adds a new partition to the in-memory partition table held by this `Fdisk`. This operation
+    /// is **non-interactive**, and uses the given `partition` parameter as a template.
+    ///
+    /// Using a template is particularly important for adding a partition to an `MBR` partition
+    /// table. By setting a specific starting sector and/or partition number for the template, it
+    /// is possible to differentiate between logical and extended partitions following the rules
+    /// outlined below:
+    ///
+    /// - if the starting sector of `partition` is within the range reserved for the extended
+    /// partition, this method will add a logical partition to the `MBR`,
+    /// - if the starting sector of `partition` is outside the range reserved for the extended
+    /// partition, this method will add a primary partition to the `MBR`,
+    /// - if `partition` has a partition number < 4, this method will add a primary partition to
+    /// the `MBR`,
+    /// - if `partition` has a partition number >= 4, this method will add a logical partition to
+    /// the `MBR`.
+    ///
+    /// If the template lacks essential information necessary to complete the process, it will
+    /// revert to interactively asking for the missing data.
+    pub fn partition_add(&mut self, partition: Partition) -> Result<usize, FdiskError> {
+        log::debug!("Fdisk::partition_add adding a new partition");
+
+        Self::add_partition(self.inner, partition.inner)
+    }
+
+    /// Adds a new partition to the partition table to be created by this `Fdisk`. This
+    /// operation is **interactive**, using [`Prompt`](crate::core::prompt::Prompt)s to collect the
+    /// partition's parameters.
+    pub fn partition_add_interactive(&mut self) -> Result<usize, FdiskError> {
+        log::debug!("Fdisk::partition_add adding a new partition (interactive)");
+
+        Self::add_partition(self.inner, std::ptr::null_mut())
+    }
+
+    /// Deletes a partition with the given identification number from the partition table on the
+    /// device assigned to this `Fdisk`.
+    pub fn partition_delete(&mut self, partition_number: usize) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::partition_delete deleting partition with number: {:?}",
+            partition_number
+        );
+
+        let result = unsafe { libfdisk::fdisk_delete_partition(self.inner, partition_number) };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::partition_delete deleted partition with number: {:?}",
+                    partition_number
+                );
+                Ok(())
+            }
+            code => {
+                let err_msg = format!(
+                    "failed to delete partition with number: {:?}",
+                    partition_number
+                );
+                log::debug!("Fdisk::partition_delete {}. libfdisk::fdisk_delete_partition returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Deletes all partitions in the partition table on the device assigned to this `Fdisk`.
+    pub fn partition_delete_all(&mut self) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partition_delete_all deleting all partitions");
+
+        let result = unsafe { libfdisk::fdisk_delete_all_partitions(self.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::partition_delete_all deleted all partitions");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to delete all partitions".to_owned();
+                log::debug!("Fdisk::partition_delete_all {}. libfdisk::fdisk_delete_all_partitions returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Returns the next partition's number.
+    fn next_partition_number(
+        ptr: &mut Self,
+        partition: *mut libfdisk::fdisk_partition,
+    ) -> Result<usize, FdiskError> {
+        let mut number = MaybeUninit::<libc::size_t>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_partition_next_partno(partition, ptr.inner, number.as_mut_ptr())
+        };
+        match result {
+            0 => {
+                let part_number = unsafe { number.assume_init() };
+                log::debug!("Fdisk::next_partition_number value: {:?}", part_number);
+
+                Ok(part_number)
+            }
+            1 => {
+                let err_msg = "no partition number available".to_owned();
+                log::debug!("Fdisk::next_partition_number {}", err_msg);
+
+                Err(FdiskError::NoNextPartitionNumber(err_msg))
+            }
+            code if code == -libc::ERANGE => {
+                let err_msg = "partition number out of range".to_owned();
+                log::debug!("Fdisk::next_partition_number {}", err_msg);
+
+                Err(FdiskError::ResultOutOfRange(err_msg))
+            }
+            code if code == -libc::EINVAL => {
+                let err_msg = "unable to ask for next partition number".to_owned();
+                log::debug!("Fdisk::next_partition_number {}", err_msg);
+
+                Err(FdiskError::DialogsDisabled(err_msg))
+            }
+            code => {
+                let err_msg = "failed to get next partition number".to_owned();
+                log::debug!("Fdisk::next_partition_number {}. libfdisk::fdisk_partition_next_partno returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Prompt(err_msg))
+            }
+        }
+    }
+
+    /// Asks the user to specify the next partition's number.
+    pub fn partition_ask_next_number(&mut self) -> Result<usize, FdiskError> {
+        log::debug!("Fdisk::partition_ask_next_number asking for next partition number");
+
+        Self::next_partition_number(self, std::ptr::null_mut())
+    }
+
+    /// Returns the first free partition number following the `partition` template's, provided a
+    /// partition number was not set at creation; falls back to interactively asking the user for a
+    /// partition number otherwise.
+    pub fn partition_next_number(&mut self, partition: &Partition) -> Result<usize, FdiskError> {
+        log::debug!("Fdisk::partition_next_number getting next partition number");
+
+        Self::next_partition_number(self, partition.inner)
+    }
+
+    /// Overrides the configuration of the partition with identification number matching
+    /// `partition_number` with the `template`'s parameters.
+    pub fn partition_override_settings(
+        &mut self,
+        partition_number: usize,
+        template: &Partition,
+    ) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partition_override_settings overriding partition settings");
+
+        let result =
+            unsafe { libfdisk::fdisk_set_partition(self.inner, partition_number, template.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::partition_override_settings overrode partition settings");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to override partition settings".to_owned();
+                log::debug!("Fdisk::partition_override_settings {}. libfdisk::fdisk_set_partition returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Override(err_msg))
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Sets the `Partition` matching the identification number `partition_number` for metadata erasure.
+    fn wipe_partition(
+        ptr: *mut libfdisk::fdisk_context,
+        partition_number: usize,
+        enable: bool,
+    ) -> Result<(), FdiskError> {
+        let op_str = if enable {
+            "enable".to_owned()
+        } else {
+            "disable".to_owned()
+        };
+        let op = if enable { 1 } else { 0 };
+
+        let result = unsafe { libfdisk::fdisk_wipe_partition(ptr, partition_number, op) };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::wipe_partition {}d wipe for partition with number: {:?}",
+                    op_str,
+                    partition_number
+                );
+
+                Ok(())
+            }
+            code => {
+                let err_msg = format!(
+                    "failed to {} wipe for partition with number: {:?}",
+                    op_str, partition_number
+                );
+                log::debug!("Fdisk::wipe_partition {}. libfdisk::fdisk_wipe_partition returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Marks all metadata on the [`Partition`] matching the given `partition_number` for deletion.
+    pub fn partition_wipe_activate(&mut self, partition_number: usize) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partition_wipe_activate enabling partition wipe");
+
+        Self::wipe_partition(self.inner, partition_number, true)
+    }
+
+    /// Marks all metadata on the [`Partition`] matching the given `partition_number` for
+    /// preservation.
+    pub fn partition_wipe_deactivate(&mut self, partition_number: usize) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partition_wipe_deactivate enabling partition wipe");
+
+        Self::wipe_partition(self.inner, partition_number, false)
+    }
+
     //---- END mutators
 
     //---- BEGIN getters
@@ -1225,15 +1487,6 @@ impl<'a> Fdisk<'a> {
                 })
             }
         }
-    }
-
-    /// Returns the format in which a `Fdisk` displays partition sizes.
-    pub fn partition_size_format(&self) -> SizeFormat {
-        let code = unsafe { libfdisk::fdisk_get_size_unit(self.inner) };
-        let size_format = SizeFormat::try_from(code as u32).unwrap();
-        log::debug!("Fdisk::partition_size_format value: {:?}", size_format);
-
-        size_format
     }
 
     /// Returns the number of sectors per cylinder when this `Fdisk` is set to display data in
@@ -1677,9 +1930,138 @@ impl<'a> Fdisk<'a> {
         }
     }
 
+    /// Returns the format in which a `Fdisk` displays partition sizes.
+    pub fn partition_size_format(&self) -> SizeFormat {
+        let code = unsafe { libfdisk::fdisk_get_size_unit(self.inner) };
+        let size_format = SizeFormat::try_from(code as u32).unwrap();
+        log::debug!("Fdisk::partition_size_format value: {:?}", size_format);
+
+        size_format
+    }
+
+    /// Returns the assigned device's name.
+    /// Returns the content of a [`Partition`]'s field in string form.
+    pub fn partition_field_to_string(
+        &self,
+        field: Field,
+        partition: &Partition,
+    ) -> Result<String, FdiskError> {
+        log::debug!(
+            "Fdisk::partition_field_to_string convert content of partition field {:?} to string",
+            field
+        );
+        let cfield = field as u32 as i32;
+
+        let mut content_ptr = MaybeUninit::<*mut libc::c_char>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_partition_to_string(
+                partition.inner,
+                self.inner,
+                cfield,
+                content_ptr.as_mut_ptr(),
+            )
+        };
+
+        match result {
+            0 => {
+                let ptr = unsafe { content_ptr.assume_init() };
+                let field_content = ffi_to_string_or_empty!(ptr);
+                log::debug!("Fdisk::partition_field_to_string converted content of partition field {:?} to {:?}", field, field_content);
+
+                Ok(field_content)
+            }
+            code => {
+                let err_msg = format!("failed to convert content of partition field {:?}", field);
+                log::debug!("Fdisk::partition_field_to_string {}. libfdisk::fdisk_partition_to_string returned error code: {:?}", err_msg, code);
+
+                match -code {
+                    libc::ENOMEM => Err(FdiskError::OutOfMemory(err_msg)),
+                    _ => Err(FdiskError::Unexpected(err_msg)),
+                }
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Gets a partition by its index number in a partition array.
+    fn get_partition_by_number(
+        fdisk: &Self,
+        partition_number: usize,
+    ) -> Option<*mut libfdisk::fdisk_partition> {
+        let mut partition_ptr = MaybeUninit::<*mut libfdisk::fdisk_partition>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_get_partition(fdisk.inner, partition_number, partition_ptr.as_mut_ptr())
+        };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::get_partition_by_number got partition with identification number: {:?}",
+                    partition_number
+                );
+
+                let partition = unsafe { partition_ptr.assume_init() };
+
+                Some(partition)
+            }
+            code => {
+                let err_msg = format!(
+                    "no partition with identification number: {:?}",
+                    partition_number
+                );
+                log::debug!("Fdisk::get_partition_by_number {}. libfdisk::fdisk_get_partition returned error code: {:?}", err_msg, code);
+
+                None
+            }
+        }
+    }
+
+    /// Returns a reference to a [`Partition`] from its identification number.
+    pub fn partition_by_number(&self, partition_number: usize) -> Option<&Partition> {
+        log::debug!(
+            "Partition::partition_by_number getting partition with identification number: {:?}",
+            partition_number
+        );
+
+        Self::get_partition_by_number(self, partition_number)
+            .map(|ptr| owning_ref_from_ptr!(self, Partition, ptr))
+    }
+
+    /// Returns a mutable reference to a [`Partition`] from its identification number.
+    pub fn partition_by_number_mut(&mut self, partition_number: usize) -> Option<&mut Partition> {
+        log::debug!(
+            "Partition::partition_by_number_mut getting partition with identification number: {:?}",
+            partition_number
+        );
+
+        Self::get_partition_by_number(self, partition_number)
+            .map(|ptr| owning_mut_from_ptr!(self, Partition, ptr))
+    }
+
     //---- END getters
 
     //---- BEGIN predicates
+
+    /// Returns `true` when the given `partition_number` is being used.
+    ///
+    /// **Note:** the first partition has identification number `0`.
+    pub fn partition_is_number_in_use(&self, partition_number: usize) -> bool {
+        let state = unsafe { libfdisk::fdisk_is_partition_used(self.inner, partition_number) == 1 };
+        log::debug!("Fdisk::partition_is_number_in_use value: {:?}", state);
+
+        state
+    }
+
+    /// Returns `true` when all metadata on the device area specified by the [`Partition`] will be
+    /// wiped when the partition table is written to disk.
+    pub fn is_partition_wipe_active(&self, partition: &Partition) -> bool {
+        let state = unsafe { libfdisk::fdisk_partition_has_wipe(self.inner, partition.inner) == 1 };
+        log::debug!("Fdisk::is_partition_wipe_active value: {:?}", state);
+
+        state
+    }
 
     /// Returns `true` if the user has overridden some device properties.
     pub fn has_overriden_device_properties(&self) -> bool {
