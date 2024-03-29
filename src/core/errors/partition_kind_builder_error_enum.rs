@@ -7,8 +7,21 @@ use thiserror::Error;
 // From standard library
 
 // From this library
+use crate::core::errors::PartitionKindError;
 
-/// `PartitionKindBuilder` runtime errors.
+/// [`PartitionKindBuilder`](crate::core::partition::PartitionKindBuilder) runtime errors.
 #[derive(Debug, Error)]
 #[non_exhaustive]
-pub enum PartitionKindBuilderError {}
+pub enum PartitionKindBuilderError {
+    /// Error while configuring [`PartitionKind`](crate::core::partition::PartitionKind) instance.
+    #[error(transparent)]
+    Config(#[from] PartitionKindError),
+
+    /// Error if two mutually exclusive setter functions are called.
+    #[error("{0}")]
+    MutuallyExclusive(String),
+
+    /// Error if a required method is not called.
+    #[error("{0}")]
+    Required(String),
+}

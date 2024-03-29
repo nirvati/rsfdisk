@@ -37,9 +37,17 @@ These tools were essential for collecting copies:
 
 [NixOS - Environment variables][11] [[a]][12]
 
+## Rust
+
+[How do I handle errors from libc functions in an idiomatic Rust manner?][15] [[a]][16]
+
 ## Partition table/ partition
 
 [GUID Partition Table (GPT) Disk Layout][13] [[a]][14]
+
+[Partition type][17] [[a]][18]
+
+[GUID Partition Table][19] [[a]][20]
 
 [1]: https://wiki.alpinelinux.org/wiki/Repositories#Managing_repositories
 [2]: alpine-linux/managing-repositories.html
@@ -55,3 +63,9 @@ These tools were essential for collecting copies:
 [12]: nixos/environment-variables.html
 [13]: https://uefi.org/specs/UEFI/2.10/05_GUID_Partition_Table_Format.html
 [14]: web-snapshots/standards/GPT-MBR-partition-table-format.html
+[15]: https://stackoverflow.com/questions/42772307/how-do-i-handle-errors-from-libc-functions-in-an-idiomatic-rust-manner
+[16]: rust/handle_libc_error_in_idiomatic_rust.html
+[17]: https://en.wikipedia.org/wiki/Partition_type
+[18]: misc/partition-type.html
+[19]: https://en.wikipedia.org/w/index.php?title=GUID_Partition_Table&oldid=1214116294#Partition_type_GUIDs
+[20]: misc/guid-partition-table.html

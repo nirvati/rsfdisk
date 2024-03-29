@@ -569,22 +569,22 @@
 //!
 //! #### Partition types
 //!
-//! | `libfdisk`                                  | `rsfdisk`                                                |
-//! | ------------------                          | ---------                                                |
-//! | [`struct fdisk_parttype`][236]              | [`PartitionKind`](crate::core::partition::PartitionKind) |
-//! | [`enum   fdisk_parttype_parser_flags`][237] |                                                          |
-//! | [`fdisk_copy_parttype`][238]                |                                                          |
-//! | [`fdisk_new_parttype`][239]                 |                                                          |
-//! | [`fdisk_new_unknown_parttype`][240]         |                                                          |
-//! | [`fdisk_parttype_get_code`][241]            |                                                          |
-//! | [`fdisk_parttype_get_name`][242]            |                                                          |
-//! | [`fdisk_parttype_get_string`][243]          |                                                          |
-//! | [`fdisk_parttype_is_unknown`][244]          |                                                          |
-//! | [`fdisk_parttype_set_code`][245]            |                                                          |
-//! | [`fdisk_parttype_set_name`][246]            |                                                          |
-//! | [`fdisk_parttype_set_typestr`][247]         |                                                          |
-//! | [`fdisk_ref_parttype`][248]                 |                                                          |
-//! | [`fdisk_unref_parttype`][249]               |                                                          |
+//! | `libfdisk`                                  | `rsfdisk`                                                                                                        |
+//! | ------------------                          | ---------                                                                                                        |
+//! | [`struct fdisk_parttype`][236]              | [`PartitionKind`](crate::core::partition::PartitionKind)                                                         |
+//! | [`enum   fdisk_parttype_parser_flags`][237] |                                                                                                                  |
+//! | [`fdisk_copy_parttype`][238]                | [`PartitionKind::clone`](crate::core::partition::PartitionKind::clone)                                           |
+//! | [`fdisk_new_parttype`][239]                 | [`PartitionKind::builder`](crate::core::partition::PartitionKind::builder)                                       |
+//! | [`fdisk_new_unknown_parttype`][240]         | [`PartitionKindBuilder::unknown_kind`](crate::core::partition::PartitionKindBuilder::unknown_kind)               |
+//! | [`fdisk_parttype_get_code`][241]            | [`PartitionKind::code`](crate::core::partition::PartitionKind::code)                                             |
+//! | [`fdisk_parttype_get_name`][242]            | [`PartitionKind::name`](crate::core::partition::PartitionKind::name)                                             |
+//! | [`fdisk_parttype_get_string`][243]          | [`PartitionKind::guid`](crate::core::partition::PartitionKind::guid)                                             |
+//! | [`fdisk_parttype_is_unknown`][244]          | [`PartitionKind::is_unknown_type`](crate::core::partition::PartitionKind::is_unknown_type)                       |
+//! | [`fdisk_parttype_set_code`][245]            | [`PartitionKindBuilder::code`](crate::core::partition::PartitionKindBuilder::code)                               |
+//! | [`fdisk_parttype_set_name`][246]            | [`PartitionKindBuilder::name`](crate::core::partition::PartitionKindBuilder::name)                               |
+//! | [`fdisk_parttype_set_typestr`][247]         | [`PartitionKindBuilder::guid`](crate::core::partition::PartitionKindBuilder::guid)                               |
+//! | [`fdisk_ref_parttype`][248]                 | Managed automatically.                                                                                           |
+//! | [`fdisk_unref_parttype`][249]               | [`PartitionKind`](crate::core::partition::PartitionKind) is automatically deallocated when it goes out of scope. |
 //!
 //! [236]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Partition-types.html#fdisk-parttype
 //! [237]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Partition-types.html#fdisk-parttype-parser-flags
