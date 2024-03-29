@@ -10,6 +10,8 @@
 // From this library
 pub use code_enum::Code;
 pub use guid_enum::Guid;
+pub use partition_kind_struct::PartitionKind;
 
 mod code_enum;
 mod guid_enum;
+mod partition_kind_struct;

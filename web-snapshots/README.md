@@ -37,6 +37,10 @@ These tools were essential for collecting copies:
 
 [NixOS - Environment variables][11] [[a]][12]
 
+## Partition table/ partition
+
+[GUID Partition Table (GPT) Disk Layout][13] [[a]][14]
+
 [1]: https://wiki.alpinelinux.org/wiki/Repositories#Managing_repositories
 [2]: alpine-linux/managing-repositories.html
 [3]: https://unix.stackexchange.com/questions/751105/how-to-enable-automatic-login-in-alpine-linux-for-root
@@ -49,3 +53,5 @@ These tools were essential for collecting copies:
 [10]: nixos/c-header-includes.html
 [11]: https://nixos.wiki/wiki/Environment_variables
 [12]: nixos/environment-variables.html
+[13]: https://uefi.org/specs/UEFI/2.10/05_GUID_Partition_Table_Format.html
+[14]: web-snapshots/standards/GPT-MBR-partition-table-format.html

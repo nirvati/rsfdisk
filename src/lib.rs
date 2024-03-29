@@ -569,22 +569,22 @@
 //!
 //! #### Partition types
 //!
-//! | `libfdisk`                                  | `rsfdisk` |
-//! | ------------------                          | --------- |
-//! | [`struct fdisk_parttype`][236]              |           |
-//! | [`enum   fdisk_parttype_parser_flags`][237] |           |
-//! | [`fdisk_copy_parttype`][238]                |           |
-//! | [`fdisk_new_parttype`][239]                 |           |
-//! | [`fdisk_new_unknown_parttype`][240]         |           |
-//! | [`fdisk_parttype_get_code`][241]            |           |
-//! | [`fdisk_parttype_get_name`][242]            |           |
-//! | [`fdisk_parttype_get_string`][243]          |           |
-//! | [`fdisk_parttype_is_unknown`][244]          |           |
-//! | [`fdisk_parttype_set_code`][245]            |           |
-//! | [`fdisk_parttype_set_name`][246]            |           |
-//! | [`fdisk_parttype_set_typestr`][247]         |           |
-//! | [`fdisk_ref_parttype`][248]                 |           |
-//! | [`fdisk_unref_parttype`][249]               |           |
+//! | `libfdisk`                                  | `rsfdisk`                                                |
+//! | ------------------                          | ---------                                                |
+//! | [`struct fdisk_parttype`][236]              | [`PartitionKind`](crate::core::partition::PartitionKind) |
+//! | [`enum   fdisk_parttype_parser_flags`][237] |                                                          |
+//! | [`fdisk_copy_parttype`][238]                |                                                          |
+//! | [`fdisk_new_parttype`][239]                 |                                                          |
+//! | [`fdisk_new_unknown_parttype`][240]         |                                                          |
+//! | [`fdisk_parttype_get_code`][241]            |                                                          |
+//! | [`fdisk_parttype_get_name`][242]            |                                                          |
+//! | [`fdisk_parttype_get_string`][243]          |                                                          |
+//! | [`fdisk_parttype_is_unknown`][244]          |                                                          |
+//! | [`fdisk_parttype_set_code`][245]            |                                                          |
+//! | [`fdisk_parttype_set_name`][246]            |                                                          |
+//! | [`fdisk_parttype_set_typestr`][247]         |                                                          |
+//! | [`fdisk_ref_parttype`][248]                 |                                                          |
+//! | [`fdisk_unref_parttype`][249]               |                                                          |
 //!
 //! [236]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Partition-types.html#fdisk-parttype
 //! [237]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Partition-types.html#fdisk-parttype-parser-flags
