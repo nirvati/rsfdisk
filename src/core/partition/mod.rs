@@ -15,6 +15,7 @@ pub use partition_builder_struct::PartitionBuilder;
 pub(crate) use partition_kind_builder_struct::PartTypeBuilder;
 pub use partition_kind_builder_struct::PartitionKindBuilder;
 pub use partition_kind_struct::PartitionKind;
+pub use partition_list_struct::PartitionList;
 pub use partition_struct::Partition;
 
 mod code_enum;
@@ -22,4 +23,5 @@ mod guid_enum;
 mod partition_builder_struct;
 mod partition_kind_builder_struct;
 mod partition_kind_struct;
+mod partition_list_struct;
 mod partition_struct;

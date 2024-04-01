@@ -529,25 +529,25 @@
 //!
 //! #### Table
 //!
-//! | `libfdisk`                                   | `rsfdisk` |
-//! | ------------------                           | --------- |
-//! | [`struct fdisk_table`][219]                  |           |
-//! | [`fdisk_get_freespaces`][220]                |           |
-//! | [`fdisk_get_partitions`][221]                |           |
-//! | [`fdisk_apply_table`][222]                   |           |
-//! | [`fdisk_new_table`][223]                     |           |
-//! | [`fdisk_ref_table`][224]                     |           |
-//! | [`fdisk_reset_table`][225]                   |           |
-//! | [`fdisk_table_add_partition`][226]           |           |
-//! | [`fdisk_table_get_nents`][227]               |           |
-//! | [`fdisk_table_get_partition`][228]           |           |
-//! | [`fdisk_table_get_partition_by_partno`][229] |           |
-//! | [`fdisk_table_is_empty`][230]                |           |
-//! | [`fdisk_table_next_partition`][231]          |           |
-//! | [`fdisk_table_remove_partition`][232]        |           |
-//! | [`fdisk_table_sort_partitions`][233]         |           |
-//! | [`fdisk_table_wrong_order`][234]             |           |
-//! | [`fdisk_unref_table`][235]                   |           |
+//! | `libfdisk`                                   | `rsfdisk`                                                                                                                                                                                                                          |
+//! | ------------------                           | ---------                                                                                                                                                                                                                          |
+//! | [`struct fdisk_table`][219]                  | [`PartitionList`](crate::core::partition::PartitionList)                                                                                                                                                                           |
+//! | [`fdisk_get_freespaces`][220]                |                                                                                                                                                                                                                                    |
+//! | [`fdisk_get_partitions`][221]                |                                                                                                                                                                                                                                    |
+//! | [`fdisk_apply_table`][222]                   |                                                                                                                                                                                                                                    |
+//! | [`fdisk_new_table`][223]                     | [`PartitionList::new`](crate::core::partition::PartitionList::new)                                                                                                                                                                 |
+//! | [`fdisk_ref_table`][224]                     | Managed automatically.                                                                                                                                                                                                             |
+//! | [`fdisk_reset_table`][225]                   | [`PartitionList::clear`](crate::core::partition::PartitionList::clear)                                                                                                                                                             |
+//! | [`fdisk_table_add_partition`][226]           | [`PartitionList::push`](crate::core::partition::PartitionList::push)                                                                                                                                                               |
+//! | [`fdisk_table_get_nents`][227]               | [`PartitionList::len`](crate::core::partition::PartitionList::len)                                                                                                                                                                 |
+//! | [`fdisk_table_get_partition`][228]           | [`PartitionList::get`](crate::core::partition::PartitionList::get) <br> [`PartitionList::get_mut`](crate::core::partition::PartitionList::get_mut)                                                                                 |
+//! | [`fdisk_table_get_partition_by_partno`][229] | [`PartitionList::get_by_partition_number`](crate::core::partition::PartitionList::get_by_partition_number) <br> [`PartitionList::get_by_partition_number_mut`](crate::core::partition::PartitionList::get_by_partition_number_mut) |
+//! | [`fdisk_table_is_empty`][230]                | [`PartitionList::is_empty`](crate::core::partition::PartitionList::is_empty)                                                                                                                                                       |
+//! | [`fdisk_table_next_partition`][231]          |                                                                                                                                                                                                                                    |
+//! | [`fdisk_table_remove_partition`][232]        | [`PartitionList::remove`](crate::core::partition::PartitionList::remove)                                                                                                                                                           |
+//! | [`fdisk_table_sort_partitions`][233]         | Can not implement without a data pointer in the `cmp` function see [Passing Rust closure to C](http://blog.sagetheprogrammer.com/neat-rust-tricks-passing-rust-closures-to-c)                                                      |
+//! | [`fdisk_table_wrong_order`][234]             | [`PartitionList::is_not_in_increasing_order`](crate::core::partition::PartitionList::is_not_in_increasing_order)                                                                                                                   |
+//! | [`fdisk_unref_table`][235]                   | [`PartitionList`](crate::core::partition::PartitionList) instances are automatically deallocated when they drop out of scope.                                                                                                      |
 //!
 //! [219]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Table.html#fdisk-table
 //! [220]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Table.html#fdisk-get-freespaces

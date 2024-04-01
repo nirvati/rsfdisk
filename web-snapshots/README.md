@@ -41,6 +41,8 @@ These tools were essential for collecting copies:
 
 [How do I handle errors from libc functions in an idiomatic Rust manner?][15] [[a]][16]
 
+[Neat Rust Tricks: Passing Rust Closures to C][21] [[a]][22]
+
 ## Partition table/ partition
 
 [GUID Partition Table (GPT) Disk Layout][13] [[a]][14]
@@ -69,3 +71,5 @@ These tools were essential for collecting copies:
 [18]: misc/partition-type.html
 [19]: https://en.wikipedia.org/w/index.php?title=GUID_Partition_Table&oldid=1214116294#Partition_type_GUIDs
 [20]: misc/guid-partition-table.html
+[21]: http://blog.sagetheprogrammer.com/neat-rust-tricks-passing-rust-closures-to-c
+[22]: web-snapshots/rust/passing-rust-closures-to-c.html
