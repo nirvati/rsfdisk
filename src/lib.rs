@@ -745,13 +745,13 @@
 //! ### Misc
 //! #### Iterator
 //!
-//! | `libfdisk`                        | `rsfdisk` |
-//! | ------------------                | --------- |
-//! | [`struct fdisk_iter`][300]        |           |
-//! | [`fdisk_free_iter`][301]          |           |
-//! | [`fdisk_iter_get_direction`][302] |           |
-//! | [`fdisk_new_iter`][303]           |           |
-//! | [`fdisk_reset_iter`][304]         |           |
+//! | `libfdisk`                        | `rsfdisk`                                                                                                                                                                                                                         |
+//! | ------------------                | ---------                                                                                                                                                                                                                         |
+//! | [`struct fdisk_iter`][300]        | [`GenIterator`](crate::core::iter::GenIterator)                                                                                                                                                                                   |
+//! | [`fdisk_free_iter`][301]          | [`GenIterator`](crate::core::iter::GenIterator) is automatically deallocated when it goes out of scope.                                                                                                                           |
+//! | [`fdisk_iter_get_direction`][302] | [`GenIterator::direction`](crate::core::iter::GenIterator::direction)                                                                                                                                                             |
+//! | [`fdisk_new_iter`][303]           | [`GenIterator::new`](crate::core::iter::GenIterator::new)                                                                                                                                                                         |
+//! | [`fdisk_reset_iter`][304]         | [`GenIterator::reset`](crate::core::iter::GenIterator::reset)<br>[`GenIterator::reset_forward`](crate::core::iter::GenIterator::reset_forward)<br>[`GenIterator::reset_backward`](crate::core::iter::GenIterator::reset_backward) |
 //!
 //! [300]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Iterator.html#fdisk-iter
 //! [301]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Iterator.html#fdisk-free-iter
