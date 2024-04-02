@@ -20,6 +20,7 @@ use crate::fdisk::LBAAlign;
 use crate::fdisk::SizeFormat;
 
 use crate::core::partition::Partition;
+use crate::core::partition::PartitionList;
 
 use crate::core::partition_table::Field;
 
@@ -823,6 +824,36 @@ impl<'a> Fdisk<'a> {
         }
     }
 
+    /// Restores changed in-memory partition entries in the partition table to the same state as the one in the
+    /// `entries_on_disk` parameter.
+    ///
+    /// **Note:** this function does not force the kernel to reread the whole partition table.
+    /// Therefore, unmodified partitions can be mounted while this method operates.
+    pub fn reread_changed_partition_entries(
+        &mut self,
+        entries_on_disk: &PartitionList,
+    ) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::reread_changed_partition_entries rereading changed partition table entries"
+        );
+
+        let result = unsafe { libfdisk::fdisk_reread_changes(self.inner, entries_on_disk.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::reread_changed_partition_entries reread changed partition table entries");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to reread changed partition table entries".to_owned();
+                log::debug!("Fdisk::reread_changed_partition_entries {}. libfdisk::fdisk_reread_changes returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Restore(err_msg))
+            }
+        }
+    }
+
     /// Sets the location of the first logical sector on disk.
     ///
     /// **Warning:** This is a very low-level function, use it only when you work with unusual
@@ -1220,6 +1251,32 @@ impl<'a> Fdisk<'a> {
         log::debug!("Fdisk::partition_add adding a new partition (interactive)");
 
         Self::add_partition(self.inner, std::ptr::null_mut())
+    }
+
+    /// Appends the elements of the given [`PartitionList`] to this `Fdisk`'s in-memory partition table.
+    ///
+    /// **Note:** this method will ignore any [`Partition`] that does not use the first free starting
+    /// sector, or lacks one.
+    pub fn partitions_append(&self, partitions: PartitionList) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partitions_append appending partitions to the partition table");
+
+        unsafe {
+            match libfdisk::fdisk_apply_table(self.inner, partitions.inner) {
+                0 => {
+                    log::debug!(
+                        "Fdisk::partitions_append appended partitions to the partition table"
+                    );
+
+                    Ok(())
+                }
+                code => {
+                    let err_msg = "failed to append partitions to the partition table".to_owned();
+                    log::debug!("Fdisk::partitions_append {}. libfdisk::fdisk_apply_table returned error code: {:?}", err_msg, code);
+
+                    Err(FdiskError::Config(err_msg))
+                }
+            }
+        }
     }
 
     /// Deletes a partition with the given identification number from the partition table on the
@@ -2040,6 +2097,66 @@ impl<'a> Fdisk<'a> {
             .map(|ptr| owning_mut_from_ptr!(self, Partition, ptr))
     }
 
+    /// Returns a list of unallocated spaces on the assigned device as a collection of
+    /// [`Partition`]s, or `None` if the device has no partition table.
+    ///
+    /// **Note:** this method will ignore free space smaller than the assigned device's alignment
+    /// unit (see [`Fdisk::device_alignment_unit`])
+    pub fn list_empty_spaces(&self) -> Option<PartitionList> {
+        log::debug!("Fdisk::list_empty_spaces listing unallocated spaces");
+
+        let mut ptr = MaybeUninit::<*mut libfdisk::fdisk_table>::zeroed();
+
+        let result = unsafe { libfdisk::fdisk_get_freespaces(self.inner, ptr.as_mut_ptr()) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::list_empty_spaces listed unallocated spaces");
+                let ptr = unsafe { ptr.assume_init() };
+                let list = PartitionList::from_ptr(ptr);
+
+                Some(list)
+            }
+            code => {
+                let err_msg = "failed to list unallocated spaces on assigned device".to_owned();
+                log::debug!("Fdisk::list_empty_spaces {}. libfdisk::fdisk_get_freespaces returned error code: {:?}", err_msg, code);
+
+                None
+            }
+        }
+    }
+
+    /// Returns a list of the [`Partition`]s in this `Fdisk`.
+    pub fn list_partitions(&self) -> Option<PartitionList> {
+        log::debug!("Fdisk::list_partitions extracting partitions from partition table");
+
+        let mut ptr = MaybeUninit::<*mut libfdisk::fdisk_table>::zeroed();
+
+        let result = unsafe { libfdisk::fdisk_get_partitions(self.inner, ptr.as_mut_ptr()) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::list_partitions extracted partitions from partition table");
+                let ptr = unsafe { ptr.assume_init() };
+                let list = PartitionList::from_ptr(ptr);
+
+                Some(list)
+            }
+            code => {
+                let err_msg = match -code {
+                    libc::EINVAL => "no partition table on device".to_owned(),
+                    libc::ENOSYS => "no partition in partition table".to_owned(),
+                    libc::ENOMEM => "out of memory".to_owned(),
+                    _ => "failed to list partitions in partition table".to_owned(),
+                };
+
+                log::debug!("Fdisk::list_partitions {}. libfdisk::fdisk_get_partitions returned error code: {:?}", err_msg, code);
+
+                None
+            }
+        }
+    }
+
     //---- END getters
 
     //---- BEGIN predicates
@@ -2780,6 +2897,71 @@ mod tests {
         let expected = size;
         assert_eq!(actual, expected);
         assert_ne!(actual, default_grain_size);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_not_list_empty_spaces_on_blank_device() -> crate::Result<()> {
+        let tmp_image = blank_image_file();
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.list_empty_spaces();
+        assert!(actual.is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_list_empty_spaces_on_device_with_partition_table() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("dos_bsd");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.list_empty_spaces();
+        assert!(actual.is_some());
+
+        let list = actual.unwrap();
+        let actual = list.len();
+        let expected = 0;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_not_list_partitions_on_blank_device() -> crate::Result<()> {
+        let tmp_image = blank_image_file();
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.list_partitions();
+        assert!(actual.is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_not_list_partitions_on_unpartitioned_device() -> crate::Result<()> {
+        let tmp_image = disk_image_with_fs("ext4");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.list_partitions();
+        assert!(actual.is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_list_partitions_on_partitioned_device() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("dos_bsd");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.list_partitions();
+        assert!(actual.is_some());
+
+        let list = actual.unwrap();
+        let actual = list.len();
+        let expected = 2;
+        assert_eq!(actual, expected);
 
         Ok(())
     }
