@@ -547,7 +547,7 @@
 //! | [`fdisk_table_remove_partition`][232]        | [`PartitionList::remove`](crate::core::partition::PartitionList::remove)                                                                                                                                                           |
 //! | [`fdisk_table_sort_partitions`][233]         | Can not implement without a data pointer in the `cmp` function see [Passing Rust closure to C](http://blog.sagetheprogrammer.com/neat-rust-tricks-passing-rust-closures-to-c)                                                      |
 //! | [`fdisk_table_wrong_order`][234]             | [`PartitionList::is_not_in_increasing_order`](crate::core::partition::PartitionList::is_not_in_increasing_order)                                                                                                                   |
-//! | [`fdisk_unref_table`][235]                   | [`PartitionList`](crate::core::partition::PartitionList) instances are automatically deallocated when they drop out of scope.                                                                                                      |
+//! | [`fdisk_unref_table`][235]                   | [`PartitionList`](crate::core::partition::PartitionList) is automatically deallocated when it goes out of scope.                                                                                                                   |
 //!
 //! [219]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Table.html#fdisk-table
 //! [220]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Table.html#fdisk-get-freespaces

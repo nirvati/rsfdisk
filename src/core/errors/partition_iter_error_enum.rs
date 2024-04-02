@@ -7,8 +7,12 @@ use thiserror::Error;
 // From standard library
 
 // From this library
+use crate::core::errors::GenIteratorError;
 
-/// `PartitionVecIter` runtime errors.
+/// [`PartitionIter`](crate::core::partition::PartitionIter) runtime errors.
 #[derive(Debug, Error)]
 #[non_exhaustive]
-pub enum PartitionIterError {}
+pub enum PartitionIterError {
+    #[error(transparent)]
+    GenIterator(#[from] GenIteratorError),
+}
