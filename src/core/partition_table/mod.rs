@@ -10,7 +10,9 @@
 // From this library
 
 pub use field_enum::Field;
+pub use field_format_struct::FieldFormat;
 pub use max_col_width_enum::MaxColWidth;
 
 mod field_enum;
+mod field_format_struct;
 mod max_col_width_enum;

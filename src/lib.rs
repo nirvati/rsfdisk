@@ -641,14 +641,14 @@
 //!
 //! #### Field
 //!
-//! | `libfdisk`                      | `rsfdisk` |
-//! | ------------------              | --------- |
-//! | [`struct fdisk_field`][266]     |           |
-//! | [`enum   fdisk_fieldtype`][267] |           |
-//! | [`fdisk_field_get_id`][268]     |           |
-//! | [`fdisk_field_get_name`][269]   |           |
-//! | [`fdisk_field_get_width`][270]  |           |
-//! | [`fdisk_field_is_number`][271]  |           |
+//! | `libfdisk`                      | `rsfdisk`                                                                          |
+//! | ------------------              | ---------                                                                          |
+//! | [`struct fdisk_field`][266]     | [`FieldFormat`](crate::core::partition_table::FieldFormat)                         |
+//! | [`enum   fdisk_fieldtype`][267] | [`Field`](crate::core::partition_table::Field)                                     |
+//! | [`fdisk_field_get_id`][268]     | [`FieldFormat::field`](crate::core::partition_table::FieldFormat::field)           |
+//! | [`fdisk_field_get_name`][269]   | [`FieldFormat::col_name`](crate::core::partition_table::FieldFormat::col_name)     |
+//! | [`fdisk_field_get_width`][270]  | [`FieldFormat::width`](crate::core::partition_table::FieldFormat::width)           |
+//! | [`fdisk_field_is_number`][271]  | [`FieldFormat::is_numeric`](crate::core::partition_table::FieldFormat::is_numeric) |
 //!
 //! [266]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Field.html#fdisk-field
 //! [267]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Field.html#fdisk-fieldtype
