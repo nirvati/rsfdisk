@@ -11,12 +11,14 @@
 
 pub use field_enum::Field;
 pub use field_format_struct::FieldFormat;
+pub use header_entry_content_struct::HeaderEntryContent;
 pub use header_entry_enum::HeaderEntry;
 pub use input_type_enum::InputType;
 pub use max_col_width_enum::MaxColWidth;
 
 mod field_enum;
 mod field_format_struct;
+mod header_entry_content_struct;
 mod header_entry_enum;
 mod input_type_enum;
 mod max_col_width_enum;

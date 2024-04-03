@@ -603,24 +603,24 @@
 //!
 //! #### Label item
 //!
-//! | `libfdisk`                               | `rsfdisk` |
-//! | ------------------                       | --------- |
-//! | [`struct fdisk_labelitem`][250]          |           |
-//! | [`enum   fdisk_labelitem_bsd`][251]      |           |
-//! | [`enum   fdisk_labelitem_gen`][252]      |           |
-//! | [`enum   fdisk_labelitem_gpt`][253]      |           |
-//! | [`enum   fdisk_labelitem_sgi`][254]      |           |
-//! | [`enum   fdisk_labelitem_sun`][255]      |           |
-//! | [`fdisk_new_labelitem`][256]             |           |
-//! | [`fdisk_ref_labelitem`][257]             |           |
-//! | [`fdisk_reset_labelitem`][258]           |           |
-//! | [`fdisk_unref_labelitem`][259]           |           |
-//! | [`fdisk_labelitem_get_name`][260]        |           |
-//! | [`fdisk_labelitem_get_id`][261]          |           |
-//! | [`fdisk_labelitem_get_data_u64`][262]    |           |
-//! | [`fdisk_labelitem_get_data_string`][263] |           |
-//! | [`fdisk_labelitem_is_string`][264]       |           |
-//! | [`fdisk_labelitem_is_number`][265]       |           |
+//! | `libfdisk`                               | `rsfdisk`                                                                                                                        |
+//! | ------------------                       | ---------                                                                                                                        |
+//! | [`struct fdisk_labelitem`][250]          | [`HeaderEntryContent`](crate::core::partition_table::HeaderEntryContent)                                                         |
+//! | [`enum   fdisk_labelitem_bsd`][251]      | [`HeaderEntry`](crate::core::partition_table::HeaderEntry)                                                                       |
+//! | [`enum   fdisk_labelitem_gen`][252]      | [`HeaderEntry`](crate::core::partition_table::HeaderEntry)                                                                       |
+//! | [`enum   fdisk_labelitem_gpt`][253]      | [`HeaderEntry`](crate::core::partition_table::HeaderEntry)                                                                       |
+//! | [`enum   fdisk_labelitem_sgi`][254]      | [`HeaderEntry`](crate::core::partition_table::HeaderEntry)                                                                       |
+//! | [`enum   fdisk_labelitem_sun`][255]      | [`HeaderEntry`](crate::core::partition_table::HeaderEntry)                                                                       |
+//! | [`fdisk_new_labelitem`][256]             | Private method.                                                                                                                  |
+//! | [`fdisk_ref_labelitem`][257]             | Managed automatically.                                                                                                           |
+//! | [`fdisk_reset_labelitem`][258]           | Not implemented. `HeaderEntry` instances are immutable.                                                                          |
+//! | [`fdisk_unref_labelitem`][259]           | [`HeaderEntryContent`](crate::core::partition_table::HeaderEntryContent) is automatically deallocated when it goes out of scope. |
+//! | [`fdisk_labelitem_get_name`][260]        | [`HeaderEntryContent::name`](crate::core::partition_table::HeaderEntryContent::name)                                             |
+//! | [`fdisk_labelitem_get_id`][261]          | [`HeaderEntryContent::header_entry`](crate::core::partition_table::HeaderEntryContent::header_entry)                             |
+//! | [`fdisk_labelitem_get_data_u64`][262]    | [`HeaderEntryContent::data_u64`](crate::core::partition_table::HeaderEntryContent::data_u64)                                     |
+//! | [`fdisk_labelitem_get_data_string`][263] | [`HeaderEntryContent::data_string`](crate::core::partition_table::HeaderEntryContent::data_string)                               |
+//! | [`fdisk_labelitem_is_string`][264]       | [`HeaderEntryContent::is_string`](crate::core::partition_table::HeaderEntryContent::is_string)                                   |
+//! | [`fdisk_labelitem_is_number`][265]       | [`HeaderEntryContent::is_numeric`](crate::core::partition_table::HeaderEntryContent::is_numeric)                                 |
 //!
 //! [250]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Labelitem.html#fdisk-labelitem
 //! [251]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Labelitem.html#fdisk-labelitem-bsd

@@ -8,7 +8,11 @@ use thiserror::Error;
 
 // From this library
 
-/// `HeaderEntryContent` runtime errors.
+/// [`HeaderEntryContent`](crate::core::partition_table::HeaderEntryContent) runtime errors.
 #[derive(Debug, Error)]
 #[non_exhaustive]
-pub enum HeaderEntryContentError {}
+pub enum HeaderEntryContentError {
+    /// Error while creating a new [`HeaderEntryContent`](crate::core::partition_table::HeaderEntryContent) instance.
+    #[error("{0}")]
+    Creation(String),
+}
