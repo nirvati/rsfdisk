@@ -18,7 +18,6 @@ pub struct Range {
 
 impl Range {
     #[doc(hidden)]
-    #[allow(dead_code)]
     /// Creates a new `Range`.
     pub(crate) fn new(lower_bound: u64, upper_bound: u64) -> Range {
         log::debug!(

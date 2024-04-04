@@ -331,49 +331,49 @@
 //! ### Partitioning
 //! #### Label
 //!
-//! | `libfdisk`                                    | `rsfdisk` |
-//! | ------------------                            | --------- |
-//! | [`struct fdisk_label`][126]                   |           |
-//! | [`enum   fdisk_labeltype`][127]               |           |
-//! | [`fdisk_create_disklabel`][128]               |           |
-//! | [`fdisk_list_disklabel`][129]                 |           |
-//! | [`fdisk_locate_disklabel`][130]               |           |
-//! | [`fdisk_reorder_partitions`][131]             |           |
-//! | [`fdisk_set_disklabel_id`][132]               |           |
-//! | [`fdisk_set_disklabel_id_from_string`][133]   |           |
-//! | [`fdisk_set_partition_type`][134]             |           |
-//! | [`fdisk_toggle_partition_flag`][135]          |           |
-//! | [`fdisk_verify_disklabel`][136]               |           |
-//! | [`fdisk_write_disklabel`][137]                |           |
-//! | [`fdisk_get_disklabel_id`][138]               |           |
-//! | [`fdisk_get_label`][139]                      |           |
-//! | [`fdisk_get_nlabels`][140]                    |           |
-//! | [`fdisk_next_label`][141]                     |           |
-//! | [`fdisk_get_npartitions`][142]                |           |
-//! | [`fdisk_is_label`][143]()                     |           |
-//! | [`fdisk_label_advparse_parttype`][144]        |           |
-//! | [`fdisk_label_get_field`][145]                |           |
-//! | [`fdisk_label_get_field_by_name`][146]        |           |
-//! | [`fdisk_label_get_fields_ids`][147]           |           |
-//! | [`fdisk_label_get_fields_ids_all`][148]       |           |
-//! | [`fdisk_label_get_geomrange_cylinders`][149]  |           |
-//! | [`fdisk_label_get_geomrange_heads`][150]      |           |
-//! | [`fdisk_label_get_geomrange_sectors`][151]    |           |
-//! | [`fdisk_label_get_name`][152]                 |           |
-//! | [`fdisk_label_get_nparttypes`][153]           |           |
-//! | [`fdisk_label_get_parttype`][154]             |           |
-//! | [`fdisk_label_get_parttype_from_code`][155]   |           |
-//! | [`fdisk_label_get_parttype_from_string`][156] |           |
-//! | [`fdisk_label_get_parttype_shortcut`][157]    |           |
-//! | [`fdisk_label_get_type`][158]                 |           |
-//! | [`fdisk_label_has_code_parttypes`][159]       |           |
-//! | [`fdisk_label_has_parttypes_shortcuts`][160]  |           |
-//! | [`fdisk_label_is_changed`][161]               |           |
-//! | [`fdisk_label_is_disabled`][162]              |           |
-//! | [`fdisk_label_parse_parttype`][163]           |           |
-//! | [`fdisk_label_require_geometry`][164]         |           |
-//! | [`fdisk_label_set_changed`][165]              |           |
-//! | [`fdisk_label_set_disabled`][166]             |           |
+//! | `libfdisk`                                    | `rsfdisk`                                                                                                                                                                                                    |
+//! | ------------------                            | ---------                                                                                                                                                                                                    |
+//! | [`struct fdisk_label`][126]                   | [`PartitionTable`](crate::core::partition_table::PartitionTable)                                                                                                                                             |
+//! | [`enum   fdisk_labeltype`][127]               | [`PartitionTableKind`](crate::core::partition_table::PartitionTableKind)                                                                                                                                     |
+//! | [`fdisk_create_disklabel`][128]               |                                                                                                                                                                                                              |
+//! | [`fdisk_list_disklabel`][129]                 |                                                                                                                                                                                                              |
+//! | [`fdisk_locate_disklabel`][130]               |                                                                                                                                                                                                              |
+//! | [`fdisk_reorder_partitions`][131]             |                                                                                                                                                                                                              |
+//! | [`fdisk_set_disklabel_id`][132]               |                                                                                                                                                                                                              |
+//! | [`fdisk_set_disklabel_id_from_string`][133]   |                                                                                                                                                                                                              |
+//! | [`fdisk_set_partition_type`][134]             |                                                                                                                                                                                                              |
+//! | [`fdisk_toggle_partition_flag`][135]          |                                                                                                                                                                                                              |
+//! | [`fdisk_verify_disklabel`][136]               |                                                                                                                                                                                                              |
+//! | [`fdisk_write_disklabel`][137]                |                                                                                                                                                                                                              |
+//! | [`fdisk_get_disklabel_id`][138]               |                                                                                                                                                                                                              |
+//! | [`fdisk_get_label`][139]                      |                                                                                                                                                                                                              |
+//! | [`fdisk_get_nlabels`][140]                    |                                                                                                                                                                                                              |
+//! | [`fdisk_next_label`][141]                     |                                                                                                                                                                                                              |
+//! | [`fdisk_get_npartitions`][142]                |                                                                                                                                                                                                              |
+//! | [`fdisk_is_label`][143]()                     |                                                                                                                                                                                                              |
+//! | [`fdisk_label_advparse_parttype`][144]        | [`PartitionTable::partition_type_parse`](crate::core::partition_table::PartitionTable::partition_type_parse)                                                                                                 |
+//! | [`fdisk_label_get_field`][145]                | [`PartitionTable::partition_field_format`](crate::core::partition_table::PartitionTable::partition_field_format)                                                                                             |
+//! | [`fdisk_label_get_field_by_name`][146]        | [`PartitionTable::partition_field_format_by_name`](crate::core::partition_table::PartitionTable::partition_field_format_by_name)                                                                             |
+//! | [`fdisk_label_get_fields_ids`][147]           |                                                                                                                                                                                                              |
+//! | [`fdisk_label_get_fields_ids_all`][148]       |                                                                                                                                                                                                              |
+//! | [`fdisk_label_get_geomrange_cylinders`][149]  | [`PartitionTable::geometry_cylinders`](crate::core::partition_table::PartitionTable::geometry_cylinders)                                                                                                     |
+//! | [`fdisk_label_get_geomrange_heads`][150]      | [`PartitionTable::geometry_heads`](crate::core::partition_table::PartitionTable::geometry_heads)                                                                                                             |
+//! | [`fdisk_label_get_geomrange_sectors`][151]    | [`PartitionTable::geometry_sectors`](crate::core::partition_table::PartitionTable::geometry_sectors)                                                                                                         |
+//! | [`fdisk_label_get_name`][152]                 | [`PartitionTable::name`](crate::core::partition_table::PartitionTable::name)                                                                                                                                 |
+//! | [`fdisk_label_get_nparttypes`][153]           | [`PartitionTable::count_supported_partition_types`](crate::core::partition_table::PartitionTable::count_supported_partition_types)                                                                           |
+//! | [`fdisk_label_get_parttype`][154]             | [`PartitionTable::supported_partition_types`](crate::core::partition_table::PartitionTable::supported_partition_types)                                                                                       |
+//! | [`fdisk_label_get_parttype_from_code`][155]   | [`PartitionTable::partition_type_from_code`](crate::core::partition_table::PartitionTable::partition_type_from_code)                                                                                         |
+//! | [`fdisk_label_get_parttype_from_string`][156] | [`PartitionTable::partition_type_from_string`](crate::core::partition_table::PartitionTable::partition_type_from_string)                                                                                     |
+//! | [`fdisk_label_get_parttype_shortcut`][157]    | [`PartitionTable::partition_type_shortcut`](crate::core::partition_table::PartitionTable::partition_type_shortcut)                                                                                           |
+//! | [`fdisk_label_get_type`][158]                 | [`PartitionTable::kind`](crate::core::partition_table::PartitionTable::kind)                                                                                                                                 |
+//! | [`fdisk_label_has_code_parttypes`][159]       | [`PartitionTable::uses_partition_type_codes`](crate::core::partition_table::PartitionTable::uses_partition_type_codes)                                                                                       |
+//! | [`fdisk_label_has_parttypes_shortcuts`][160]  | [`PartitionTable::supports_partition_type_shortcuts`](crate::core::partition_table::PartitionTable::supports_partition_type_shortcuts)                                                                       |
+//! | [`fdisk_label_is_changed`][161]               | [`PartitionTable::has_changes`](crate::core::partition_table::PartitionTable::has_changes)                                                                                                                   |
+//! | [`fdisk_label_is_disabled`][162]              | [`PartitionTable::is_disabled`](crate::core::partition_table::PartitionTable::is_disabled)                                                                                                                   |
+//! | [`fdisk_label_parse_parttype`][163]           | [`PartitionTable::partition_type_from_string_id`](crate::core::partition_table::PartitionTable::partition_type_from_string_id)                                                                               |
+//! | [`fdisk_label_require_geometry`][164]         | [`PartitionTable::requires_chs_addressing`](crate::core::partition_table::PartitionTable::requires_chs_addressing)                                                                                           |
+//! | [`fdisk_label_set_changed`][165]              | [`PartitionTable::mark_as_changed`](crate::core::partition_table::PartitionTable::mark_as_changed)<br>[`PartitionTable::mark_as_unchanged`](crate::core::partition_table::PartitionTable::mark_as_unchanged) |
+//! | [`fdisk_label_set_disabled`][166]             | [`PartitionTable::disable`](crate::core::partition_table::PartitionTable::disable)<br>[`PartitionTable::enable`](crate::core::partition_table::PartitionTable::enable)                                       |
 //!
 //! [126]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Label.html#fdisk-label
 //! [127]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Label.html#fdisk-labeltype

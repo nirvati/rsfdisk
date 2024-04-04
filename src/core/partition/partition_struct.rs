@@ -134,7 +134,6 @@ impl Partition {
 
     #[doc(hidden)]
     /// Borrows a `Partition` instance.
-    #[allow(dead_code)]
     pub(crate) fn borrow_ptr(ptr: *mut libfdisk::fdisk_partition) -> Partition {
         let mut partition = Self { inner: ptr };
         // We are virtually ceding ownership of this partition which will be automatically
@@ -157,6 +156,7 @@ impl Partition {
     }
 
     #[doc(hidden)]
+    #[allow(dead_code)]
     /// Wraps a boxed raw `libfdisk::fdisk_partition` pointer in a safe reference.
     pub(crate) unsafe fn mut_from_boxed_ptr<'a>(
         ptr: Box<*mut libfdisk::fdisk_partition>,

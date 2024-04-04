@@ -18,7 +18,6 @@ pub struct Shortcut {
 
 impl Shortcut {
     #[doc(hidden)]
-    #[allow(dead_code)]
     /// Creates a `Shortcut`.
     pub(crate) fn new(
         alias: String,
