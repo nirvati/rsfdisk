@@ -10,6 +10,8 @@
 //! 3. [Usage](#usage)
 //! 4. [Examples](#examples)
 //!     1. [Read device topology](#read-device-topology)
+//!     2. [List device partitions](#list-device-partitions)
+//!     3. [Partition a device](#partition-a-device)
 //!
 //! ## Description
 //!
@@ -70,6 +72,164 @@
 //!     // Disk /dev/vda: 8 GiB, 8589934592 bytes, 16777216 sectors
 //!     // Sector size (logical/physical): 512 bytes / 512 bytes
 //!     // I/O size (minimum/optimal): 512 bytes / 512 bytes
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! ### List device partitions
+//!
+//! We can use `Fdisk` to list the partitions on a device, mimicking the behaviour of the
+//! `fdisk -l /dev/vda` command.
+//!
+//! ```ignore
+//! use terminal_size::{terminal_size, Width};
+//! use rsfdisk::core::partition_table::MaxColWidth;
+//! use rsfdisk::fdisk::Fdisk;
+//! use rsfdisk::fdisk::SizeFormat;
+//!
+//!
+//! fn main() -> rsfdisk::Result<()> {
+//!     let disk = Fdisk::builder()
+//!         // Read metadata on `/dev/vda`.
+//!         .assign_device("/dev/vda")
+//!         // Return sizes in a human readable form.
+//!         .partition_size_format(SizeFormat::HumanReadable)
+//!         .build()?;
+//!
+//!     let table = disk.partition_table_current().unwrap();
+//!     let formats = disk.partition_table_collect_partition_field_formats(table)?;
+//!
+//!     // Collect column headers.
+//!     let headers: Vec<_> = formats
+//!         .iter()
+//!         .enumerate()
+//!         .map(|(i, f)| {
+//!             let col_name = f.col_name().unwrap();
+//!             format!("({}) {}", i + 1, col_name)
+//!         })
+//!         .collect();
+//!
+//!     let mut rows: Vec<String> = vec![];
+//!
+//!     // Collect and format data about each partition.
+//!     let partitions = disk.list_partitions().unwrap();
+//!
+//!     for partition in partitions.iter() {
+//!         let mut columns: Vec<String> = vec![];
+//!
+//!         for field_format in formats.iter() {
+//!             let (Width(w), _) = terminal_size::terminal_size().unwrap();
+//!             let mut value = disk.partition_field_to_string(field_format.field(), partition)?;
+//!
+//!             match field_format.width().unwrap() {
+//!                 MaxColWidth::Length(l) => {
+//!                     let max_width = l as usize;
+//!                     value.truncate(max_width);
+//!
+//!                     let cell = format!("{:>max_width$} ", value);
+//!                     columns.push(cell);
+//!                 }
+//!                 MaxColWidth::Percentage(p) => {
+//!                     let max_width = (w * p / 100) as usize;
+//!                     value.truncate(max_width);
+//!
+//!                     let cell = format!("{:max_width$} ", value);
+//!                     columns.push(cell);
+//!                 }
+//!             }
+//!         }
+//!
+//!         rows.push(columns.join(" "));
+//!     }
+//!
+//!     println!("Columns: {}\n", headers.join(" "));
+//!     println!("{}", rows.join("\n"));
+//!
+//!     // Example output
+//!     //
+//!     // Columns: (1) Device (2) Boot (3) Start (4) End (5) Sectors (6) Size (7) Id (8) Type
+//!     //
+//!     // /dev/vda1  *    32   7679   7648   3.7M  83  Linux
+//!     // /dev/vda2     7680  16383   8704   4.3M  a5  FreeBSD
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! ### Partition a device
+//!
+//! In this example we will divide a device into three partitions:
+//! - a 16 GiB `root` partition to keep system files,
+//! - and two 64 GiB data partitions.
+//!
+//! We let [`Fdisk`] take care of positioning and numbering the resulting logical disks on `/dev/vda`.
+//!
+//! ```ignore
+//! use rsfdisk::fdisk::Fdisk;
+//! use rsfdisk::core::partition_table::PartitionTableKind;
+//! use rsfdisk::core::partition::Guid;
+//! use rsfdisk::core::partition::Partition;
+//! use rsfdisk::core::partition::PartitionKind;
+//! use rsfdisk::core::partition::PartitionList;
+//!
+//! fn main() -> rsfdisk::Result<()> {
+//!     let mut disk = Fdisk::builder()
+//!         // Operate on `/dev/vda`.
+//!         .assign_device("/dev/vda")
+//!         // Allow Fdisk to persist changes to disk.
+//!         .enable_read_write()
+//!         // Remove all existing partition tables, file systems, and RAID signatures on the
+//!         // assigned device before writing a new partition table.
+//!         .wipe_device_metadata()
+//!         .build()?;
+//!
+//!     // Create a `GPT` partition table.
+//!     disk.partition_table_create(PartitionTableKind::GPT)?;
+//!
+//!     // Configure a 16 GiB System partition
+//!     let partition_type = PartitionKind::builder()
+//!        // Set the partition type identifier for a GUID/GPT partition table.
+//!        .guid(Guid::LinuxRootx86_64)
+//!        .build()?;
+//!
+//!     let root = Partition::builder()
+//!        .partition_type(partition_type)
+//!        .name("System")
+//!        //Assuming 512 bytes per sector, 33,554,432 sectors <=> 16 GiB.
+//!        .size_in_sectors(33_554_432)
+//!        .build()?;
+//!
+//!     // Create the root partition.
+//!     let _ = disk.partition_add(root)?;
+//!
+//!     // Configure two 64 GiB data partitions.
+//!     let mut data_partitions = PartitionList::new()?;
+//!
+//!     // Assuming 512 bytes per sector, 68,719,476,736 sectors <=> 64 GiB.
+//!     let size = 68_719_476_736;
+//!
+//!     for i in 0..2 {
+//!         let partition_type = PartitionKind::builder()
+//!            .guid(Guid::LinuxData)
+//!            .build()?;
+//!
+//!         let name = format!("Data Part {}", i + 1);
+//!
+//!         let partition = Partition::builder()
+//!            .partition_type(partition_type)
+//!            .name(name)
+//!            .size_in_sectors(size)
+//!            .build()?;
+//!
+//!         data_partitions.push(partition)?;
+//!     }
+//!
+//!     // Create the data partitions.
+//!     disk.partitions_append(data_partitions)?;
+//!
+//!     // Write the new partition table on `/dev/vda`.
+//!     disk.partition_table_write_to_disk()?;
 //!
 //!     Ok(())
 //! }

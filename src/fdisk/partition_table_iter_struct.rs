@@ -18,7 +18,6 @@ pub struct PartitionTableIter<'a> {
 }
 
 impl<'a> PartitionTableIter<'a> {
-    #[allow(dead_code)]
     pub(crate) fn new(partitioner: &'a Fdisk) -> PartitionTableIter<'a> {
         log::debug!("PartitionTableIter::new creating new `PartitionTableIter` instance");
 

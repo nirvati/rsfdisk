@@ -9,6 +9,7 @@ use std::fs::File;
 use std::mem::MaybeUninit;
 use std::os::fd::{BorrowedFd, IntoRawFd};
 use std::path::Path;
+use std::slice;
 
 // From this library
 use crate::fdisk::CtxBuilder;
@@ -17,14 +18,23 @@ use crate::fdisk::FdiskBuilder;
 use crate::fdisk::FdiskError;
 use crate::fdisk::GcItem;
 use crate::fdisk::LBAAlign;
+use crate::fdisk::PartitionTableIter;
+use crate::fdisk::PartitionTableIterMut;
 use crate::fdisk::SizeFormat;
 
+use crate::core::partition::BitFlag;
 use crate::core::partition::Partition;
+use crate::core::partition::PartitionKind;
 use crate::core::partition::PartitionList;
 
 use crate::core::partition_table::Field;
+use crate::core::partition_table::FieldFormat;
 use crate::core::partition_table::HeaderEntry;
 use crate::core::partition_table::HeaderEntryContent;
+use crate::core::partition_table::PartitionTable;
+use crate::core::partition_table::PartitionTableKind;
+use crate::core::partition_table::TableSection;
+use crate::core::partition_table::VerificationStatus;
 
 use crate::ffi_to_string_or_empty;
 use crate::ffi_utils;
@@ -1473,6 +1483,281 @@ impl<'a> Fdisk<'a> {
         Self::wipe_partition(self.inner, partition_number, false)
     }
 
+    #[doc(hidden)]
+    /// Creates a new partition table on the associated device.
+    fn create_partition_table(
+        ptr: *mut libfdisk::fdisk_context,
+        name: *const libc::c_char,
+    ) -> Result<(), FdiskError> {
+        let result = unsafe { libfdisk::fdisk_create_disklabel(ptr, name) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::create_partition_table created partition table",);
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to create partition table".to_owned();
+                log::debug!("Fdisk::create_partition_table {}. libfdisk::fdisk_create_disklabel returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Creation(err_msg))
+            }
+        }
+    }
+
+    /// Creates a default partition table which can be a `DOS` or `SUN` partition table depending on the systems.
+    pub fn partition_table_create_default(&mut self) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::partition_table_create_default creating default partition table (DOS or SUN)"
+        );
+
+        Self::create_partition_table(self.inner, std::ptr::null())
+    }
+
+    /// Creates a partition table.
+    pub fn partition_table_create(&mut self, kind: PartitionTableKind) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::partition_table_create creating {:?} partition table",
+            kind
+        );
+        let kind_cstr = ffi_utils::as_ref_str_to_c_string(kind.to_string())?;
+
+        Self::create_partition_table(self.inner, kind_cstr.as_ptr())
+    }
+
+    /// Prints all entries in the Partition Table Header on the assigned device. The data displayed
+    /// does not include details about each partition.
+    ///
+    /// To get more control over formatting and/or the particular pieces of data to display, you
+    /// can access each field in the partition table manually through
+    /// [`Fdisk::partition_table_header_entry`].
+    pub fn partition_table_display_details(&self) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partition_table_display_details displaying partition table details");
+
+        let result = unsafe { libfdisk::fdisk_list_disklabel(self.inner) };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::partition_table_display_details displayed partition table details"
+                );
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to display partition table details".to_owned();
+                log::debug!("Fdisk::partition_table_display_details {}. libfdisk::fdisk_list_disklabel returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Sorts partitions in the Partition Entry Array by their starting sectors, in increasing order.
+    pub fn partition_table_sort_partitions(&mut self) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partition_table_sort_partitions sorting partition array entries");
+
+        let result = unsafe { libfdisk::fdisk_reorder_partitions(self.inner) };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::partition_table_sort_partitions sorted partition array entries"
+                );
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to sort partition array entries".to_owned();
+                log::debug!("Fdisk::partition_table_sort_partitions {}. libfdisk::fdisk_reorder_partitions returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Interactively sets a partition table's identification number/string.
+    pub fn partition_table_set_id(&mut self) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partition_table_set_id setting partition table's ID");
+
+        let result = unsafe { libfdisk::fdisk_set_disklabel_id(self.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::partition_table_set_id partition table ID set");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to set partition table ID".to_owned();
+                log::debug!("Fdisk::partition_table_set_id {}. libfdisk::fdisk_set_disklabel_id returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Sets the partition tables string unique identifier.
+    pub fn partition_table_set_string_id<T>(&self, id: T) -> Result<(), FdiskError>
+    where
+        T: AsRef<str>,
+    {
+        let id = id.as_ref();
+        let id_cstr = ffi_utils::as_ref_str_to_c_string(id)?;
+        log::debug!(
+            "Fdisk::partition_table_set_string_id setting partition table's ID: {:?}",
+            id
+        );
+
+        let result =
+            unsafe { libfdisk::fdisk_set_disklabel_id_from_string(self.inner, id_cstr.as_ptr()) };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::partition_table_set_string_id set partition table's ID to: {:?}",
+                    id
+                );
+
+                Ok(())
+            }
+            code => {
+                let err_msg = format!("failed to set partition table's ID to {:?}", id);
+                log::debug!("Fdisk::partition_table_set_string_id {}. libfdisk::fdisk_set_disklabel_id_from_string returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Sets the type of the partition matching `partition_number`.
+    pub fn partition_table_set_partition_type(
+        &mut self,
+        partition_number: usize,
+        kind: PartitionKind,
+    ) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::partition_table_set_partition_type setting type of partition {:?}",
+            partition_number
+        );
+
+        let result =
+            unsafe { libfdisk::fdisk_set_partition_type(self.inner, partition_number, kind.inner) };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::partition_table_set_partition_type set type of partition {:?}",
+                    partition_number
+                );
+
+                Ok(())
+            }
+            code => {
+                let err_msg = format!("failed to set type of partition {:?}", partition_number);
+                log::debug!("Fdisk::partition_table_set_partition_type {}. libfdisk::fdisk_set_partition_type returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Toggles the `bit` flag of the partition with `partition_number`.
+    pub fn partition_table_toggle_partition_flag(
+        &mut self,
+        partition_number: usize,
+        bit: BitFlag,
+    ) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::partition_table_toggle_partition_flag toggling flag: {:?} of partition: {:?}",
+            bit,
+            partition_number
+        );
+
+        let result = unsafe {
+            libfdisk::fdisk_toggle_partition_flag(self.inner, partition_number, bit.to_u64())
+        };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::partition_table_toggle_partition_flag toggled flag: {:?} of partition: {:?}", bit, partition_number);
+
+                Ok(())
+            }
+            code => {
+                let err_msg = format!(
+                    "failed to toggle flag: {:?} of partition: {:?}",
+                    bit, partition_number
+                );
+                log::debug!("Fdisk::partition_table_toggle_partition_flag {}. libfdisk::fdisk_toggle_partition_flag returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    /// Checks whether a partition table is well-formed.
+    pub fn partition_table_check(&self) -> VerificationStatus {
+        log::debug!("Fdisk::partition_table_check checking partition table");
+
+        let result = unsafe { libfdisk::fdisk_verify_disklabel(self.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::partition_table_check partition table check successful");
+
+                VerificationStatus::Success
+            }
+            code if code < 0 => {
+                log::debug!("Fdisk::partition_table_check a configuration or runtime error occurred. libfdisk::fdisk_verify_disklabel returned error code: {:?}", code);
+
+                VerificationStatus::Error
+            }
+            error_count => {
+                log::debug!(
+                    "Fdisk::partition_table_check partition table check found {:?} errors",
+                    error_count
+                );
+
+                VerificationStatus::Issues(error_count as usize)
+            }
+        }
+    }
+
+    /// Writes the in-memory partition table to disk.
+    pub fn partition_table_write_to_disk(&mut self) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::partition_table_write_to_disk writing partition table to disk");
+
+        let result = unsafe { libfdisk::fdisk_write_disklabel(self.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::partition_table_write_to_disk wrote partition table to disk");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to write partition table to disk".to_owned();
+                log::debug!("Fdisk::partition_table_write_to_disk {}. libfdisk::fdisk_write_disklabel returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Save(err_msg))
+            }
+        }
+    }
+
+    /// Returns `true` when the partition table on the assigned disk matches the given type.
+    pub fn partition_table_is_of_type(&self, kind: PartitionTableKind) -> bool {
+        let kind_u32: u32 = kind.into();
+        let state = unsafe { libfdisk::fdisk_is_labeltype(self.inner, kind_u32) == 1 };
+        log::debug!(
+            "Fdisk::partition_table_is_of_type is partition table of type {:?}? {:?}",
+            kind,
+            state
+        );
+
+        state
+    }
     //---- END mutators
 
     //---- BEGIN getters
@@ -2102,8 +2387,8 @@ impl<'a> Fdisk<'a> {
     /// Returns a list of unallocated spaces on the assigned device as a collection of
     /// [`Partition`]s, or `None` if the device has no partition table.
     ///
-    /// **Note:** this method will ignore free space smaller than the assigned device's alignment
-    /// unit (see [`Fdisk::device_alignment_unit`])
+    /// **Note:** this method will ignore free space smaller than the assigned device's grain
+    /// size (see [`Fdisk::device_grain_size`])
     pub fn list_empty_spaces(&self) -> Option<PartitionList> {
         log::debug!("Fdisk::list_empty_spaces listing unallocated spaces");
 
@@ -2196,8 +2481,376 @@ impl<'a> Fdisk<'a> {
         }
     }
 
+    /// Returns the partition table's ID in string form.
+    pub fn partition_table_id(&self) -> Option<String> {
+        log::debug!("Fdisk::partition_table_id getting partition table's ID");
+
+        let mut id_ptr = MaybeUninit::<*mut libc::c_char>::zeroed();
+
+        let result = unsafe { libfdisk::fdisk_get_disklabel_id(self.inner, id_ptr.as_mut_ptr()) };
+
+        match result {
+            0 => {
+                match unsafe { id_ptr.assume_init() } {
+                    ptr if ptr.is_null() => {
+                        let err_msg = "no partition table ID".to_owned();
+                        log::debug!("Fdisk::partition_table_id {}. libfdisk::fdisk_get_disklabel_id returned a NULL pointer", err_msg);
+
+                        None
+                    }
+                    ptr => {
+                        let id = ffi_utils::c_char_array_to_string(ptr);
+                        // We took ownership of the allocated char array returned by `fdisk_get_disklabel_id`,
+                        // we free it here to avoid a memory leak.
+                        unsafe {
+                            libc::free(ptr as *mut _);
+                        }
+
+                        log::debug!(
+                            "Fdisk::partition_table_id got partition table's ID: {:?}",
+                            id
+                        );
+
+                        Some(id)
+                    }
+                }
+            }
+            code => {
+                let err_msg = "failed to get partition table's ID".to_owned();
+                log::debug!("Fdisk::partition_table_id {}. libfdisk::fdisk_get_disklabel_id returned error code: {:?}", err_msg, code);
+
+                None
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Returns the partition table associated with this `Fdisk`.
+    fn get_partition_table(
+        ptr: &Self,
+        name: *const libc::c_char,
+    ) -> Option<*mut libfdisk::fdisk_label> {
+        let mut part_table_ptr = MaybeUninit::<*mut libfdisk::fdisk_label>::zeroed();
+        unsafe {
+            part_table_ptr.write(libfdisk::fdisk_get_label(ptr.inner, name));
+        }
+
+        match unsafe { part_table_ptr.assume_init() } {
+            ptr if ptr.is_null() => {
+                log::debug!("Fdisk::get_partition_table found no partition table. libfdisk::fdisk_get_label returned a NULL pointer");
+
+                None
+            }
+            ptr => {
+                log::debug!("Fdisk::get_partition_table found requested partition table");
+
+                Some(ptr)
+            }
+        }
+    }
+
+    /// Returns a reference to the current partition table associated with this `Fdisk`.
+    pub fn partition_table_current(&self) -> Option<&PartitionTable> {
+        log::debug!("Fdisk::partition_table_current getting current partition table");
+
+        Self::get_partition_table(self, std::ptr::null())
+            .map(|ptr| owning_ref_from_ptr!(self, PartitionTable, ptr))
+    }
+
+    /// Returns a mutable reference to the current partition table associated with this `Fdisk`.
+    pub fn partition_table_current_mut(&mut self) -> Option<&mut PartitionTable> {
+        log::debug!("Fdisk::partition_table_current_mut getting current partition table");
+
+        Self::get_partition_table(self, std::ptr::null())
+            .map(|ptr| owning_mut_from_ptr!(self, PartitionTable, ptr))
+    }
+
+    /// Returns a reference to the current table associated with this `Fdisk` matching the given type.
+    pub fn partition_table_by_type(&self, kind: PartitionTableKind) -> Option<&PartitionTable> {
+        log::debug!(
+            "Fdisk::partition_table_by_type getting partition table of type: {:?}",
+            kind
+        );
+        let name_cstr = kind.to_c_string();
+
+        Self::get_partition_table(self, name_cstr.as_ptr())
+            .map(|ptr| owning_ref_from_ptr!(self, PartitionTable, ptr))
+    }
+
+    /// Returns a mutable reference to the current table associated with this `Fdisk` matching the given type.
+    pub fn partition_table_by_type_mut(
+        &mut self,
+        kind: PartitionTableKind,
+    ) -> Option<&mut PartitionTable> {
+        log::debug!(
+            "Fdisk::partition_table_by_type_mut getting partition table of type: {:?}",
+            kind
+        );
+        let name_cstr = kind.to_c_string();
+
+        Self::get_partition_table(self, name_cstr.as_ptr())
+            .map(|ptr| owning_mut_from_ptr!(self, PartitionTable, ptr))
+    }
+
+    /// Returns the number of supported partition table types.
+    pub fn partition_table_count_types(&self) -> usize {
+        let count = unsafe { libfdisk::fdisk_get_nlabels(self.inner) };
+        log::debug!(
+            "Fdisk::partition_table_count_types number of supported partition table types: {:?}",
+            count
+        );
+
+        count
+    }
+
+    /// Returns the maximum number of partitions the partition table can hold.
+    ///
+    /// **Note:** this function will always return `4` for `MBR` partitions, value which
+    /// corresponds to the maximum number of logical partitions. Use an extended partition to lift
+    /// this limit.
+    pub fn partition_table_max_partitions(&self) -> usize {
+        let max = unsafe { libfdisk::fdisk_get_npartitions(self.inner) };
+        log::debug!(
+            "Fdisk::partition_table_max_partitions maximum number of partitions: {:?}",
+            max
+        );
+
+        max
+    }
+
+    #[cfg_attr(doc,
+         cfg_attr(all(),
+        doc = ::embed_doc_image::embed_image!( "fig-01", "third-party/vendor/wikipedia/GUID_Partition_Table_Scheme.svg"),
+        ))]
+    /// Returns the name, location, and size of the `nth` section of an in-memory DOS or GPT partition table.
+    ///
+    /// For example, a primary GPT partition table has three sections:
+    /// - a Protective MBR (`nth=0`),
+    /// - a Partition Table Header(`nth=1`),
+    /// - and a Partition Entry Array (`nth=2`),
+    ///
+    /// as illustrated on the diagram below.
+    ///
+    /// ![Diagram illustrating the layout of the GUID Partition Table (GPT) scheme. Each logical
+    /// block (LBA) is 512 bytes in size. LBA addresses that are negative indicate position from
+    /// the end of the volume, with −1 being the last addressable block.][fig-01]
+    ///
+    /// Source: <cite>The original uploader was Kbolino at [English
+    /// Wikipedia.](https://commons.wikimedia.org/wiki/File:GUID_Partition_Table_Scheme.svg), [CC
+    /// BY-SA
+    /// 2.5](https://creativecommons.org/licenses/by-sa/2.5), via Wikimedia Commons</cite>
+    ///
+    /// **Note:**
+    /// - `nth=3`, and `nth=4` allow access to respectively, the backup Partition Entry Array, and
+    /// the backup Partition Table Header (i.e. the secondary GPT in the diagram above).
+    /// - the values returned by this method are from a copy of the assigned device's partition
+    /// table kept in memory; which might differ from the one on disk.<br>
+    /// To have the most up-to-date values, it is recommended to invoke this method after
+    /// synchronising states by calling [`Fdisk::partition_table_write_to_disk`].
+    pub fn partition_table_section(&self, nth: i32) -> Option<TableSection> {
+        log::debug!(
+            "Fdisk::partition_table_section locating partition table section: {:?}",
+            nth
+        );
+
+        let mut name_ptr = MaybeUninit::<*const libc::c_char>::zeroed();
+        let mut offset_ptr = MaybeUninit::<u64>::zeroed();
+        let mut size_ptr = MaybeUninit::<libc::size_t>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_locate_disklabel(
+                self.inner,
+                nth,
+                name_ptr.as_mut_ptr(),
+                offset_ptr.as_mut_ptr(),
+                size_ptr.as_mut_ptr(),
+            )
+        };
+
+        match result {
+            0 => {
+                let name_cstr = unsafe { name_ptr.assume_init() };
+                let offset = unsafe { offset_ptr.assume_init() };
+                let size = unsafe { size_ptr.assume_init() };
+                let name = ffi_to_string_or_empty!(name_cstr);
+
+                let section = TableSection::new(name, offset, size);
+                log::debug!(
+                    "Fdisk::partition_table_section located partition table section: {:?}",
+                    section
+                );
+
+                Some(section)
+            }
+            code => {
+                let err_msg = format!("failed to locate partition table section: {:?}", nth);
+                log::debug!("Fdisk::partition_table_section {}. libfdisk::fdisk_locate_disklabel returned error code: {:?}", err_msg, code);
+
+                None
+            }
+        }
+    }
+
+    /// Returns a list of the default fields of a partition entry in a partition table.
+    ///
+    /// **Note**: the list of default fields depends on
+    /// [`FdiskBuilder::display_partition_details`] being set or not during this `Fdisk`'s
+    /// creation.
+    pub fn partition_table_collect_partition_fields(
+        &self,
+        table: &PartitionTable,
+    ) -> Result<Vec<Field>, FdiskError> {
+        log::debug!("Fdisk::partition_table_collect_partition_fields collecting identifier for partition table fields");
+
+        let mut array_ptr = MaybeUninit::<*mut libc::c_int>::zeroed();
+        let mut len_ptr = MaybeUninit::<libc::size_t>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_label_get_fields_ids(
+                table.inner,
+                self.inner,
+                array_ptr.as_mut_ptr(),
+                len_ptr.as_mut_ptr(),
+            )
+        };
+        match result {
+            0 => {
+                let id_array_ptr = unsafe { array_ptr.assume_init() };
+                let len = unsafe { len_ptr.assume_init() };
+                let id_array = unsafe { slice::from_raw_parts(id_array_ptr, len) };
+
+                let fields = id_array
+                    .iter()
+                    .map(|&id| Field::try_from(id as u32))
+                    .collect::<Result<Vec<Field>, _>>()
+                    .unwrap_or(vec![]);
+
+                // Freeing `libfdisk`-allocated array.
+                unsafe {
+                    libc::free(id_array_ptr as *mut _);
+                }
+
+                log::debug!("Fdisk::partition_table_collect_partition_fields collected partition table field IDs: {:?}", fields);
+
+                Ok(fields)
+            }
+            code => {
+                let err_msg = "failed to collect identifiers for partition table fields".to_owned();
+                log::debug!("Fdisk::partition_table_collect_partition_fields {}. libfdisk::fdisk_label_get_fields_ids returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Unexpected(err_msg))
+            }
+        }
+    }
+
+    /// Returns a list of [`FieldFormat`]s for the default fields of a partition entry in a
+    /// partition table.
+    ///
+    /// **Note**: the list of default fields depends on
+    /// [`FdiskBuilder::display_partition_details`] being set or not during this `Fdisk`'s
+    /// creation.
+    pub fn partition_table_collect_partition_field_formats(
+        &self,
+        table: &PartitionTable,
+    ) -> Result<Vec<FieldFormat>, FdiskError> {
+        let formats = self
+            .partition_table_collect_partition_fields(table)?
+            .iter()
+            // Partition field formats depends on static `libfdisk::fdisk_field`s defined for all
+            // partition table types supported by the library. It should be safe to unwrap below.
+            // If it is not, then libfdisk is broken!
+            .map(|&field| table.partition_field_format(field).unwrap())
+            .collect::<Vec<_>>();
+
+        Ok(formats)
+    }
+
+    /// Returns a list of all the fields of a partition entry in a partition table.
+    pub fn partition_table_collect_all_partition_fields(
+        &self,
+        table: &PartitionTable,
+    ) -> Result<Vec<Field>, FdiskError> {
+        log::debug!("Fdisk::partition_table_collect_all_partition_fields collecting identifier for partition table fields");
+
+        let mut array_ptr = MaybeUninit::<*mut libc::c_int>::zeroed();
+        let mut len_ptr = MaybeUninit::<libc::size_t>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_label_get_fields_ids_all(
+                table.inner,
+                self.inner,
+                array_ptr.as_mut_ptr(),
+                len_ptr.as_mut_ptr(),
+            )
+        };
+
+        match result {
+            0 => {
+                let id_array_ptr = unsafe { array_ptr.assume_init() };
+                let len = unsafe { len_ptr.assume_init() };
+                let id_array = unsafe { slice::from_raw_parts(id_array_ptr, len) };
+
+                let fields = id_array
+                    .iter()
+                    .map(|&id| Field::try_from(id as u32))
+                    .collect::<Result<Vec<Field>, _>>()
+                    .unwrap_or(vec![]);
+
+                // Freeing `libfdisk`-allocated array.
+                unsafe {
+                    libc::free(id_array_ptr as *mut _);
+                }
+
+                log::debug!("Fdisk::partition_table_collect_all_partition_fields collected partition table field IDs: {:?}", fields);
+
+                Ok(fields)
+            }
+            code => {
+                let err_msg = "failed to collect identifiers for partition table fiels".to_owned();
+                log::debug!("Fdisk::partition_table_collect_all_partition_fields {}. libfdisk::fdisk_label_get_fields_ids_all returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Unexpected(err_msg))
+            }
+        }
+    }
+
+    /// Returns a list of [`FieldFormat`]s for all the fields of a partition entry in a
+    /// partition table.
+    pub fn partition_table_collect_all_partition_field_formats(
+        &self,
+        table: &PartitionTable,
+    ) -> Result<Vec<FieldFormat>, FdiskError> {
+        let formats = self
+            .partition_table_collect_all_partition_fields(table)?
+            .iter()
+            // Partition field formats depends on static `libfdisk::fdisk_field`s defined for all
+            // partition table types supported by the library. It should be safe to unwrap below.
+            // If it is not, then libfdisk is broken!
+            .map(|&field| table.partition_field_format(field).unwrap())
+            .collect::<Vec<_>>();
+
+        Ok(formats)
+    }
+
     //---- END getters
-    //---- END getters
+
+    //---- BEGIN iterators
+
+    /// Returns an iterator over [`PartitionTable`]s on the assigned device.
+    pub fn iter(&self) -> PartitionTableIter {
+        log::debug!("Fdisk::iter creating a new `PartitionTableIter`");
+
+        PartitionTableIter::new(self)
+    }
+
+    /// Returns a mutable iterator over [`PartitionTable`]s on the assigned device.
+    pub fn iter_mut(&'a mut self) -> PartitionTableIterMut {
+        log::debug!("Fdisk::iter creating a new `PartitionTableIterMut`");
+
+        PartitionTableIterMut::new(self)
+    }
+
+    //---- END iterators
 
     //---- BEGIN predicates
 
@@ -2362,15 +3015,25 @@ impl<'a> Drop for Fdisk<'a> {
 #[cfg(test)]
 #[allow(unused_imports)]
 mod tests {
-    use super::*;
-    use crate::fdisk::DeviceAddressing;
-    use crate::fdisk::SizeFormat;
     use pretty_assertions::{assert_eq, assert_ne};
+    use tempfile::NamedTempFile;
+    use terminal_size::{terminal_size, Height, Width};
+
     use std::io::Read;
     use std::io::Write;
     use std::path::Path;
     use std::path::PathBuf;
-    use tempfile::NamedTempFile;
+
+    use super::*;
+    use crate::core::partition::Guid;
+    use crate::core::partition::Partition;
+    use crate::core::partition::PartitionKind;
+    use crate::core::partition::PartitionList;
+    use crate::core::partition_table::HeaderEntry;
+    use crate::core::partition_table::MaxColWidth;
+    use crate::core::partition_table::PartitionTableKind;
+    use crate::fdisk::DeviceAddressing;
+    use crate::fdisk::SizeFormat;
 
     //---- Helper functions
 
@@ -2969,6 +3632,46 @@ mod tests {
     }
 
     #[test]
+    fn fdisk_can_identify_the_type_of_a_partition_table() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("bsd");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_is_of_type(PartitionTableKind::BSD);
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let tmp_image = disk_image_with_pt("dos_bsd");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_is_of_type(PartitionTableKind::DOS);
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let tmp_image = disk_image_with_pt("gpt");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_is_of_type(PartitionTableKind::GPT);
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let tmp_image = disk_image_with_pt("sgi");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_is_of_type(PartitionTableKind::SGI);
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let tmp_image = disk_image_with_pt("sun");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_is_of_type(PartitionTableKind::SUN);
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
     fn fdisk_can_not_list_partitions_on_blank_device() -> crate::Result<()> {
         let tmp_image = blank_image_file();
         let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
@@ -3001,6 +3704,549 @@ mod tests {
         let list = actual.unwrap();
         let actual = list.len();
         let expected = 2;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_test_partition_numbers_in_use() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("gpt");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_is_number_in_use(0);
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = disk.partition_is_number_in_use(128);
+        let expected = false;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_read_entries_in_a_dos_partition_table_header() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("dos_bsd");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        // Reference
+        // https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/dos.c#L2230
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::GenericId)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Disk identifier");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_string();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_string();
+        let expected = Some("0x8f8378c0");
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_read_entries_in_a_gpt_partition_table_header() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("gpt");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        // Reference
+        // https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/gpt.c#L1277
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::GptFirstUsableLba)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("First usable LBA");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(34);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::GptLastUsableLba)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Last usable LBA");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(20446);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::GptDiskGuid)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Disk identifier");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_string();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_string();
+        let expected = Some("DD27F98D-7519-4C9E-8041-F2BFA7B1EF61");
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::GptPartitionEntryFirstLba)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Partition entries starting LBA");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(2);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::GptPartitionEntryLastLba)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Partition entries ending LBA");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(33);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::GptMaxNumberOfPartitionEntries)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Allocated partition entries");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(128);
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_read_entries_in_a_sgi_partition_table_header() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("sgi");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        // Reference
+        // https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/sgi.c#L266
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SgiPhysicalCylindersCount)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Physical cylinders");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(0);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SgiSpareSectorsPerCylinder)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Extra sects/cyl");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(0);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SgiInterleave)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Interleave");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(1);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SgiBootfile)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Bootfile");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_string();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_string();
+        let expected = Some("/unix");
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_read_entries_in_a_sun_partition_table_header() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("sun");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        // Reference
+        // https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/sun.c#L760
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SunPartitionTableType)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Label ID");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_string();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_string();
+        let expected = Some("Linux cyl 65535 alt 2 hd 1 sec 2");
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SunVolumeId)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Volume ID");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_string();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_string();
+        let expected = None;
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SunRpm)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Rpm");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(5400);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SunAlternateCylinders)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Alternate cylinders");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(2);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SunPhysicalCylinders)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Physical cylinders");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(65535);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SunExtraSectorsPerCylinder)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Extra sects/cyl");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(0);
+        assert_eq!(actual, expected);
+
+        let header_entry = disk
+            .partition_table_header_entry(HeaderEntry::SunInterleave)
+            .unwrap();
+
+        let actual = header_entry.name();
+        let expected = Some("Interleave");
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.is_numeric();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let actual = header_entry.data_u64();
+        let expected = Some(1);
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_get_the_maximum_number_of_partitions_by_type_of_partition_table(
+    ) -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("dos_bsd");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_max_partitions();
+        let expected = 4;
+        assert_eq!(actual, expected);
+
+        let tmp_image = disk_image_with_pt("gpt");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_max_partitions();
+        let expected = 128;
+        assert_eq!(actual, expected);
+
+        let tmp_image = disk_image_with_pt("sgi");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_max_partitions();
+        let expected = 16;
+        assert_eq!(actual, expected);
+
+        let tmp_image = disk_image_with_pt("sun");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_max_partitions();
+        let expected = 8;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_get_sections_of_a_dos_partition_table() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("dos_bsd");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        // Protective MBR
+        let section = disk.partition_table_section(0).unwrap();
+
+        let actual = section.name();
+        let expected = "MBR";
+        assert_eq!(actual, expected);
+
+        let actual = section.starting_offset();
+        let expected = 0;
+        assert_eq!(actual, expected);
+
+        let actual = section.size();
+        let expected = 512;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_get_sections_of_a_gpt_partition_table() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("gpt");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        // Reference
+        // https://github.com/util-linux/util-linux/blob/8aa25617467a1249669cff7240ca31973bf9a127/libfdisk/src/gpt.c#L1230
+
+        // Protective MBR
+        let section = disk.partition_table_section(0).unwrap();
+
+        let actual = section.name();
+        let expected = "PMBR";
+        assert_eq!(actual, expected);
+
+        let actual = section.starting_offset();
+        let expected = 0;
+        assert_eq!(actual, expected);
+
+        let actual = section.size();
+        let expected = 512;
+        assert_eq!(actual, expected);
+
+        // Primary GPT Header
+        let section = disk.partition_table_section(1).unwrap();
+
+        let actual = section.name();
+        let expected = "GPT Header";
+        assert_eq!(actual, expected);
+
+        let actual = section.starting_offset();
+        let expected = 512;
+        assert_eq!(actual, expected);
+
+        let actual = section.size();
+        let expected = 512;
+        assert_eq!(actual, expected);
+
+        // Partition Entry Array
+        let section = disk.partition_table_section(2).unwrap();
+
+        let actual = section.name();
+        let expected = "GPT Entries";
+        assert_eq!(actual, expected);
+
+        let actual = section.starting_offset();
+        let expected = 1024;
+        assert_eq!(actual, expected);
+
+        let actual = section.size();
+        // size of a partition entry * maximum number of entries
+        let expected = 128 * 128;
+        assert_eq!(actual, expected);
+
+        // Secondary Partition Entry Array
+        let section = disk.partition_table_section(3).unwrap();
+
+        let actual = section.name();
+        let expected = "GPT Backup Entries";
+        assert_eq!(actual, expected);
+
+        let actual = section.size();
+        // size of a partition entry * maximum number of entries
+        let expected = 128 * 128;
+        assert_eq!(actual, expected);
+        let section = disk.partition_table_section(4).unwrap();
+
+        // Secondary GPT Header
+        let actual = section.name();
+        let expected = "GPT Backup Header";
+        assert_eq!(actual, expected);
+
+        let actual = section.size();
+        let expected = 512;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn fdisk_can_partition_a_device() -> crate::Result<()> {
+        let tmp_image = blank_image_file();
+        let mut disk = Fdisk::builder()
+            .assign_device(tmp_image.path())
+            .enable_read_write()
+            .wipe_device_metadata()
+            .build()?;
+
+        // Before
+        let partition_table = disk.partition_table_current();
+        assert!(partition_table.is_none()); // No partition table
+
+        let partitions = disk.list_partitions();
+        assert!(partitions.is_none()); // No partitions
+
+        // Create 2x2MiB partitions
+        disk.partition_table_create(PartitionTableKind::GPT)?;
+        let size = 4_096; // 512 bytes per sector, 4,096 sectors <=> 2MiB
+
+        let mut data_partitions = PartitionList::new()?;
+
+        for i in 0..2 {
+            let partition_type = PartitionKind::builder().guid(Guid::LinuxData).build()?;
+
+            let name = format!("Data Part {}", i + 1);
+
+            let partition = Partition::builder()
+                .partition_type(partition_type)
+                .name(name)
+                .size_in_sectors(size)
+                .build()?;
+
+            data_partitions.push(partition)?;
+        }
+
+        disk.partitions_append(data_partitions)?;
+        disk.partition_table_write_to_disk()?;
+
+        drop(disk);
+
+        // After
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let actual = disk.partition_table_is_of_type(PartitionTableKind::GPT);
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        let partitions = disk.list_partitions().unwrap();
+        let actual = partitions.len();
+        let expected = 2;
+        assert_eq!(actual, expected);
+
+        let actual = partitions[0].size_in_sectors();
+        let expected = Some(size);
         assert_eq!(actual, expected);
 
         Ok(())
