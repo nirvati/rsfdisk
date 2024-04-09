@@ -23,6 +23,8 @@ use crate::core::partition::Partition;
 use crate::core::partition::PartitionList;
 
 use crate::core::partition_table::Field;
+use crate::core::partition_table::HeaderEntry;
+use crate::core::partition_table::HeaderEntryContent;
 
 use crate::ffi_to_string_or_empty;
 use crate::ffi_utils;
@@ -2157,6 +2159,44 @@ impl<'a> Fdisk<'a> {
         }
     }
 
+    /// Returns the content of an entry in the partition table header.
+    pub fn partition_table_header_entry(
+        &self,
+        header_entry: HeaderEntry,
+    ) -> Option<HeaderEntryContent> {
+        log::debug!(
+            "Fdisk::partition_table_header_entry getting content of partition table header entry {:?}",
+            header_entry
+        );
+        let c_header_entry = header_entry.to_original_u32() as i32;
+        let content = HeaderEntryContent::new().ok()?;
+
+        let result = unsafe {
+            libfdisk::fdisk_get_disklabel_item(self.inner, c_header_entry, content.inner)
+        };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Partition::partition_table_header_entry got content of partition table header entry {:?}",
+                    header_entry
+                );
+
+                Some(content)
+            }
+            code => {
+                let err_msg = format!(
+                    "failed to get content of partition table header entry {:?}",
+                    header_entry
+                );
+                log::debug!("Fdisk::partition_table_header_entry {}. libfdisk::fdisk_get_disklabel_item returned error code: {:?}", err_msg, code);
+
+                None
+            }
+        }
+    }
+
+    //---- END getters
     //---- END getters
 
     //---- BEGIN predicates
