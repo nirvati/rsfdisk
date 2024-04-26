@@ -7,7 +7,9 @@
 
 // From this library
 use crate::core::partition_table::PartitionTable;
+use crate::fdisk::Fdisk;
 
 pub trait Sealed {}
 
 impl Sealed for PartitionTable {}
+impl<'a> Sealed for Fdisk<'a> {}

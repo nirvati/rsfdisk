@@ -709,13 +709,13 @@
 //! ### Label specific functions
 //! #### DOS
 //!
-//! | `libfdisk`                           | `rsfdisk`                                                |
-//! | ------------------                   | ---------                                                |
-//! | [`DOS_FLAG_ACTIVE`][272]             | [`DOSFlag::Boot`](crate::core::partition::DOSFlag::Boot) |
-//! | [`fdisk_dos_enable_compatible`][273] |                                                          |
-//! | [`fdisk_dos_is_compatible`][274]     |                                                          |
-//! | [`fdisk_dos_move_begin`][275]        |                                                          |
-//! | [`fdisk_dos_fix_chs`][276]           |                                                          |
+//! | `libfdisk`                           | `rsfdisk`                                                                                                                                                                                                                                                                      |
+//! | ------------------                   | ---------                                                                                                                                                                                                                                                                      |
+//! | [`DOS_FLAG_ACTIVE`][272]             | [`DOSFlag::Boot`](crate::core::partition::DOSFlag::Boot)                                                                                                                                                                                                                       |
+//! | [`fdisk_dos_enable_compatible`][273] | [`PartitionTableDOSExt::dos_enable_compatible_mode`](crate::core::partition_table::PartitionTableDOSExt::dos_enable_compatible_mode)<br>[`PartitionTableDOSExt::dos_disable_compatible_mode`](crate::core::partition_table::PartitionTableDOSExt::dos_disable_compatible_mode) |
+//! | [`fdisk_dos_is_compatible`][274]     | [`PartitionTableDOSExt::is_dos_compatible`](crate::core::partition_table::PartitionTableDOSExt::is_dos_compatible)                                                                                                                                                             |
+//! | [`fdisk_dos_move_begin`][275]        | [`FdiskDOSExt::dos_relocate_partition`](crate::fdisk::FdiskDOSExt::dos_relocate_partition)                                                                                                                                                                                     |
+//! | [`fdisk_dos_fix_chs`][276]           | [`FdiskDOSExt::dos_fix_chs_values`](crate::fdisk::FdiskDOSExt::dos_fix_chs_values)                                                                                                                                                                                             |
 //!
 //! [272]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-DOS.html#DOS-FLAG-ACTIVE:CAPS
 //! [273]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-DOS.html#fdisk-dos-enable-compatible
