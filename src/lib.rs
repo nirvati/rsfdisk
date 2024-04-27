@@ -751,13 +751,13 @@
 //!
 //! #### SUN
 //!
-//! | `libfdisk`                       | `rsfdisk` |
-//! | ------------------               | --------- |
-//! | [`fdisk_sun_set_alt_cyl`][288]   |           |
-//! | [`fdisk_sun_set_ilfact`][289]    |           |
-//! | [`fdisk_sun_set_pcylcount`][290] |           |
-//! | [`fdisk_sun_set_rspeed`][291]    |           |
-//! | [`fdisk_sun_set_xcyl`][292]      |           |
+//! | `libfdisk`                       | `rsfdisk`                                                                                                          |
+//! | ------------------               | ---------                                                                                                          |
+//! | [`fdisk_sun_set_alt_cyl`][288]   | [`FdiskSUNExt::sun_set_alternate_cylinder_count`](crate::fdisk::FdiskSUNExt::sun_set_alternate_cylinder_count)     |
+//! | [`fdisk_sun_set_ilfact`][289]    | [`FdiskSUNExt::sun_set_interleave_factor`](crate::fdisk::FdiskSUNExt::sun_set_interleave_factor)                   |
+//! | [`fdisk_sun_set_pcylcount`][290] | [`FdiskSUNExt::sun_set_physical_cylinder_count`](crate::fdisk::FdiskSUNExt::sun_set_physical_cylinder_count)       |
+//! | [`fdisk_sun_set_rspeed`][291]    | [`FdiskSUNExt::sun_set_rotation_per_minute`](crate::fdisk::FdiskSUNExt::sun_set_rotation_per_minute)               |
+//! | [`fdisk_sun_set_xcyl`][292]      | [`FdiskSUNExt::sun_set_extra_sectors_per_cylinder`](crate::fdisk::FdiskSUNExt::sun_set_extra_sectors_per_cylinder) |
 //!
 //! [288]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-SUN.html#fdisk-sun-set-alt-cyl
 //! [289]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-SUN.html#fdisk-sun-set-ilfact
