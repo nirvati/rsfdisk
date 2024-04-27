@@ -810,9 +810,9 @@
 //!
 //! #### Utils
 //!
-//! | `libfdisk`              | `rsfdisk` |
-//! | ------------------      | --------- |
-//! | [`fdisk_partname`][305] |           |
+//! | `libfdisk`              | `rsfdisk`                             |
+//! | ------------------      | ---------                             |
+//! | [`fdisk_partname`][305] | [`core::utils::misc::partition_name`] |
 //!
 //! [305]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Utils.html#fdisk-partname
 //!
