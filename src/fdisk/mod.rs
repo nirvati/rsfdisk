@@ -242,6 +242,7 @@
 // From this library
 
 pub use device_addressing_enum::DeviceAddressing;
+pub use fdisk_bsd_ext_trait::FdiskBSDExt;
 pub use fdisk_builder_error_enum::FdiskBuilderError;
 pub(crate) use fdisk_builder_struct::CtxBuilder;
 pub use fdisk_builder_struct::FdiskBuilder;
@@ -258,6 +259,7 @@ pub use partition_table_iter_struct::PartitionTableIter;
 pub use size_format_enum::SizeFormat;
 
 mod device_addressing_enum;
+mod fdisk_bsd_ext_trait;
 mod fdisk_builder_error_enum;
 mod fdisk_builder_struct;
 mod fdisk_dos_ext_trait;

@@ -781,11 +781,11 @@
 //!
 //! #### BSD
 //!
-//! | `libfdisk`                         | `rsfdisk` |
-//! | ------------------                 | --------- |
-//! | [`fdisk_bsd_edit_disklabel`][297]  |           |
-//! | [`fdisk_bsd_link_partition`][298]  |           |
-//! | [`fdisk_bsd_write_bootstrap`][299] |           |
+//! | `libfdisk`                         | `rsfdisk`                                                                                              |
+//! | ------------------                 | ---------                                                                                              |
+//! | [`fdisk_bsd_edit_disklabel`][297]  | [`FdiskBSDExt::bsd_edit_disk_label`](crate::fdisk::FdiskBSDExt::bsd_edit_disk_label)                   |
+//! | [`fdisk_bsd_link_partition`][298]  | [`FdiskBSDExt::bsd_link_to_nested_partition`](crate::fdisk::FdiskBSDExt::bsd_link_to_nested_partition) |
+//! | [`fdisk_bsd_write_bootstrap`][299] | [`FdiskBSDExt::bsd_install_bootstrap_file`](crate::fdisk::FdiskBSDExt::bsd_install_bootstrap_file)     |
 //!
 //! [297]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-BSD.html#fdisk-bsd-edit-disklabel
 //! [298]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-BSD.html#fdisk-bsd-link-partition
