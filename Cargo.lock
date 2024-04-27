@@ -466,6 +466,7 @@ dependencies = [
  "libc",
  "log",
  "num_enum",
+ "once_cell",
  "pkg-config",
  "pretty_assertions",
  "rsfdisk-sys",

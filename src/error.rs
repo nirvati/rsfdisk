@@ -26,6 +26,8 @@ use crate::core::errors::ScriptError;
 use crate::fdisk::FdiskBuilderError;
 use crate::fdisk::FdiskError;
 
+use crate::core::utils::version::VersionError;
+
 /// A specialized [`Result`](std::result::Result) type for `rsfdisk`.
 ///
 /// This typedef is generally used at the program-level to avoid writing out [`RsFdiskError`]
@@ -94,4 +96,7 @@ pub enum RsFdiskError {
 
     #[error(transparent)]
     Script(#[from] ScriptError),
+
+    #[error(transparent)]
+    Version(#[from] VersionError),
 }

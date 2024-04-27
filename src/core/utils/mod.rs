@@ -10,3 +10,4 @@
 // From this library
 
 pub mod misc;
+pub mod version;

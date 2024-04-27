@@ -826,15 +826,15 @@
 //!
 //! #### Version functions
 //!
-//! | `libfdisk`                          | `rsfdisk` |
-//! | ------------------                  | --------- |
-//! | [`LIBFDISK_MAJOR_VERSION`][307]     |           |
-//! | [`LIBFDISK_MINOR_VERSION`][308]     |           |
-//! | [`LIBFDISK_PATCH_VERSION`][309]     |           |
-//! | [`LIBFDISK_VERSION`][310]           |           |
-//! | [`fdisk_parse_version_string`][311] |           |
-//! | [`fdisk_get_library_version`][312]  |           |
-//! | [`fdisk_get_library_features`][313] |           |
+//! | `libfdisk`                          | `rsfdisk`                                                |
+//! | ------------------                  | ---------                                                |
+//! | [`LIBFDISK_MAJOR_VERSION`][307]     | [`core::utils::version::VERSION_NUMBER_MAJOR`]           |
+//! | [`LIBFDISK_MINOR_VERSION`][308]     | [`core::utils::version::VERSION_NUMBER_MINOR`]           |
+//! | [`LIBFDISK_PATCH_VERSION`][309]     | [`core::utils::version::VERSION_NUMBER_PATCH`]           |
+//! | [`LIBFDISK_VERSION`][310]           | [`core::utils::version::VERSION_STRING`]                 |
+//! | [`fdisk_parse_version_string`][311] | [`core::utils::version::version_string_to_release_code`] |
+//! | [`fdisk_get_library_version`][312]  | [`core::utils::version::VERSION_STRING`]                 |
+//! | [`fdisk_get_library_features`][313] | [`core::utils::version::library_features`]               |
 //!
 //! [307]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Version-functions.html#LIBFDISK-MAJOR-VERSION:CAPS
 //! [308]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Version-functions.html#LIBFDISK-MINOR-VERSION:CAPS
