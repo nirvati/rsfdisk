@@ -23,6 +23,8 @@ use crate::core::errors::PartitionTableError;
 use crate::core::errors::PromptError;
 use crate::core::errors::ScriptError;
 
+use crate::fdisk::FdiskError;
+
 /// A specialized [`Result`](std::result::Result) type for `rsfdisk`.
 ///
 /// This typedef is generally used at the program-level to avoid writing out [`RsFdiskError`]
@@ -49,6 +51,9 @@ pub type Result<T> = std::result::Result<T, RsFdiskError>;
 pub enum RsFdiskError {
     #[error(transparent)]
     Conversion(#[from] ConversionError),
+
+    #[error(transparent)]
+    Fdisk(#[from] FdiskError),
 
     #[error(transparent)]
     GenIterator(#[from] GenIteratorError),
