@@ -23,6 +23,7 @@ use crate::core::errors::PartitionTableError;
 use crate::core::errors::PromptError;
 use crate::core::errors::ScriptError;
 
+use crate::fdisk::FdiskBuilderError;
 use crate::fdisk::FdiskError;
 
 /// A specialized [`Result`](std::result::Result) type for `rsfdisk`.
@@ -54,6 +55,9 @@ pub enum RsFdiskError {
 
     #[error(transparent)]
     Fdisk(#[from] FdiskError),
+
+    #[error(transparent)]
+    FdiskBuilder(#[from] FdiskBuilderError),
 
     #[error(transparent)]
     GenIterator(#[from] GenIteratorError),
