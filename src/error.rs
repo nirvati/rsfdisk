@@ -16,6 +16,7 @@ use crate::core::errors::PartitionBuilderError;
 use crate::core::errors::PartitionError;
 use crate::core::errors::PartitionKindBuilderError;
 use crate::core::errors::PartitionKindError;
+use crate::core::errors::PartitionListError;
 use crate::core::errors::PromptError;
 
 /// A specialized [`Result`](std::result::Result) type for `rsfdisk`.
@@ -62,6 +63,9 @@ pub enum RsFdiskError {
 
     #[error(transparent)]
     PartitionKindBuilder(#[from] PartitionKindBuilderError),
+
+    #[error(transparent)]
+    PartitionList(#[from] PartitionListError),
 
     #[error(transparent)]
     Prompt(#[from] PromptError),
