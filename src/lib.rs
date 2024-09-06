@@ -572,7 +572,7 @@
 //! | `libfdisk`                                  | `rsfdisk`                                                                                                        |
 //! | ------------------                          | ---------                                                                                                        |
 //! | [`struct fdisk_parttype`][236]              | [`PartitionKind`](crate::core::partition::PartitionKind)                                                         |
-//! | [`enum   fdisk_parttype_parser_flags`][237] |                                                                                                                  |
+//! | [`enum   fdisk_parttype_parser_flags`][237] | [`InputType`](crate::core::partition_table::InputType)                                                           |
 //! | [`fdisk_copy_parttype`][238]                | [`PartitionKind::clone`](crate::core::partition::PartitionKind::clone)                                           |
 //! | [`fdisk_new_parttype`][239]                 | [`PartitionKind::builder`](crate::core::partition::PartitionKind::builder)                                       |
 //! | [`fdisk_new_unknown_parttype`][240]         | [`PartitionKindBuilder::unknown_kind`](crate::core::partition::PartitionKindBuilder::unknown_kind)               |
