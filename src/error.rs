@@ -10,6 +10,7 @@ use thiserror::Error;
 
 // From this library
 use crate::core::errors::ConversionError;
+use crate::core::errors::GenIteratorError;
 use crate::core::errors::ParserError;
 use crate::core::errors::PartitionBuilderError;
 use crate::core::errors::PartitionError;
@@ -43,6 +44,9 @@ pub type Result<T> = std::result::Result<T, RsFdiskError>;
 pub enum RsFdiskError {
     #[error(transparent)]
     Conversion(#[from] ConversionError),
+
+    #[error(transparent)]
+    GenIterator(#[from] GenIteratorError),
 
     #[error(transparent)]
     Parser(#[from] ParserError),
