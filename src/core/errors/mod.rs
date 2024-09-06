@@ -10,8 +10,10 @@
 // From this library
 pub use conversion_error_enum::ConversionError;
 pub use parser_error_enum::ParserError;
+pub use partition_kind_error_enum::PartitionKindError;
 pub use prompt_error_enum::PromptError;
 
 mod conversion_error_enum;
 mod parser_error_enum;
+mod partition_kind_error_enum;
 mod prompt_error_enum;
