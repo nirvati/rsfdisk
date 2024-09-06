@@ -8,3 +8,7 @@
 // From standard library
 
 // From this library
+
+pub use menu_item_struct::MenuItem;
+
+mod menu_item_struct;
