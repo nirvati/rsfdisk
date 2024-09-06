@@ -15,6 +15,7 @@ pub use header_entry_content_struct::HeaderEntryContent;
 pub use header_entry_enum::HeaderEntry;
 pub use input_type_enum::InputType;
 pub use max_col_width_enum::MaxColWidth;
+pub use table_section_struct::TableSection;
 pub use verification_status_enum::VerificationStatus;
 
 mod field_enum;
@@ -23,4 +24,5 @@ mod header_entry_content_struct;
 mod header_entry_enum;
 mod input_type_enum;
 mod max_col_width_enum;
+mod table_section_struct;
 mod verification_status_enum;
