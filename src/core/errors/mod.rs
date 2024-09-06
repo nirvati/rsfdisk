@@ -18,6 +18,7 @@ pub use partition_iter_error_enum::PartitionIterError;
 pub use partition_kind_builder_error_enum::PartitionKindBuilderError;
 pub use partition_kind_error_enum::PartitionKindError;
 pub use partition_list_error_enum::PartitionListError;
+pub use partition_table_error_enum::PartitionTableError;
 pub use prompt_error_enum::PromptError;
 
 mod conversion_error_enum;
@@ -30,4 +31,5 @@ mod partition_iter_error_enum;
 mod partition_kind_builder_error_enum;
 mod partition_kind_error_enum;
 mod partition_list_error_enum;
+mod partition_table_error_enum;
 mod prompt_error_enum;
