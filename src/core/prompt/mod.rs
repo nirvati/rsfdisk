@@ -10,5 +10,7 @@
 // From this library
 
 pub use menu_item_struct::MenuItem;
+pub use prompt_kind_enum::PromptKind;
 
 mod menu_item_struct;
+mod prompt_kind_enum;

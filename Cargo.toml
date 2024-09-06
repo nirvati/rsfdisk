@@ -20,6 +20,7 @@ exclude = ["web-snapshots/*", "test_harness/*", "scripts/*"]
 libc = "0.2.153"
 libfdisk = { package="rsfdisk-sys", version="0.2.0" }
 log = "0.4.21"
+num_enum = "0.7.3"
 thiserror = "1.0.57"
 
 [dev-dependencies]

@@ -170,45 +170,45 @@
 //!
 //! #### Ask
 //!
-//! | `libfdisk`                                | `rsfdisk` |
-//! | ------------------                        | --------- |
-//! | [`struct fdisk_ask`][55]                  |           |
-//! | [`enum   fdisk_asktype`][56]              |           |
-//! | [`fdisk_info`][57]                        |           |
-//! | [`fdisk_warn`][58]                        |           |
-//! | [`fdisk_warnx`][59]                       |           |
-//! | [`fdisk_set_ask`][60]                     |           |
-//! | [`fdisk_is_ask`][61]                      |           |
-//! | [`fdisk_ask_get_query`][62]               |           |
-//! | [`fdisk_ask_get_type`][63]                |           |
-//! | [`fdisk_ask_menu_get_default`][64]        |           |
-//! | [`fdisk_ask_menu_get_item`][65]           |           |
-//! | [`fdisk_ask_menu_get_nitems`][66]         |           |
-//! | [`fdisk_ask_menu_get_result`][67]         |           |
-//! | [`fdisk_ask_menu_set_result`][68]         |           |
-//! | [`fdisk_ask_number`][69]                  |           |
-//! | [`fdisk_ask_number_get_base`][70]         |           |
-//! | [`fdisk_ask_number_get_default`][71]      |           |
-//! | [`fdisk_ask_number_get_high`][72]         |           |
-//! | [`fdisk_ask_number_get_low`][73]          |           |
-//! | [`fdisk_ask_number_get_range`][74]        |           |
-//! | [`fdisk_ask_number_get_result`][75]       |           |
-//! | [`fdisk_ask_number_get_unit`][76]         |           |
-//! | [`fdisk_ask_number_inchars`][77]          |           |
-//! | [`fdisk_ask_number_is_wrap_negative`][78] |           |
-//! | [`fdisk_ask_number_set_relative`][79]     |           |
-//! | [`fdisk_ask_number_set_result`][80]       |           |
-//! | [`fdisk_ask_partnum`][81]                 |           |
-//! | [`fdisk_ask_print_get_errno`][82]         |           |
-//! | [`fdisk_ask_print_get_mesg`][83]          |           |
-//! | [`fdisk_ask_string`][84]                  |           |
-//! | [`fdisk_ask_string_get_result`][85]       |           |
-//! | [`fdisk_ask_string_set_result`][86]       |           |
-//! | [`fdisk_ask_yesno`][87]                   |           |
-//! | [`fdisk_ask_yesno_get_result`][88]        |           |
-//! | [`fdisk_ask_yesno_set_result`][89]        |           |
-//! | [`fdisk_ref_ask`][90]                     |           |
-//! | [`fdisk_unref_ask`][91]                   |           |
+//! | `libfdisk`                                | `rsfdisk`                                       |
+//! | ------------------                        | ---------                                       |
+//! | [`struct fdisk_ask`][55]                  |                                                 |
+//! | [`enum   fdisk_asktype`][56]              | [`PromptKind`](crate::core::prompt::PromptKind) |
+//! | [`fdisk_info`][57]                        |                                                 |
+//! | [`fdisk_warn`][58]                        |                                                 |
+//! | [`fdisk_warnx`][59]                       |                                                 |
+//! | [`fdisk_set_ask`][60]                     |                                                 |
+//! | [`fdisk_is_ask`][61]                      |                                                 |
+//! | [`fdisk_ask_get_query`][62]               |                                                 |
+//! | [`fdisk_ask_get_type`][63]                |                                                 |
+//! | [`fdisk_ask_menu_get_default`][64]        |                                                 |
+//! | [`fdisk_ask_menu_get_item`][65]           |                                                 |
+//! | [`fdisk_ask_menu_get_nitems`][66]         |                                                 |
+//! | [`fdisk_ask_menu_get_result`][67]         |                                                 |
+//! | [`fdisk_ask_menu_set_result`][68]         |                                                 |
+//! | [`fdisk_ask_number`][69]                  |                                                 |
+//! | [`fdisk_ask_number_get_base`][70]         |                                                 |
+//! | [`fdisk_ask_number_get_default`][71]      |                                                 |
+//! | [`fdisk_ask_number_get_high`][72]         |                                                 |
+//! | [`fdisk_ask_number_get_low`][73]          |                                                 |
+//! | [`fdisk_ask_number_get_range`][74]        |                                                 |
+//! | [`fdisk_ask_number_get_result`][75]       |                                                 |
+//! | [`fdisk_ask_number_get_unit`][76]         |                                                 |
+//! | [`fdisk_ask_number_inchars`][77]          |                                                 |
+//! | [`fdisk_ask_number_is_wrap_negative`][78] |                                                 |
+//! | [`fdisk_ask_number_set_relative`][79]     |                                                 |
+//! | [`fdisk_ask_number_set_result`][80]       |                                                 |
+//! | [`fdisk_ask_partnum`][81]                 |                                                 |
+//! | [`fdisk_ask_print_get_errno`][82]         |                                                 |
+//! | [`fdisk_ask_print_get_mesg`][83]          |                                                 |
+//! | [`fdisk_ask_string`][84]                  |                                                 |
+//! | [`fdisk_ask_string_get_result`][85]       |                                                 |
+//! | [`fdisk_ask_string_set_result`][86]       |                                                 |
+//! | [`fdisk_ask_yesno`][87]                   |                                                 |
+//! | [`fdisk_ask_yesno_get_result`][88]        |                                                 |
+//! | [`fdisk_ask_yesno_set_result`][89]        |                                                 |
+//! | [`fdisk_ref_ask`][90]                     |                                                 |
+//! | [`fdisk_unref_ask`][91]                   |                                                 |
 //!
 //! [55]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Ask.html#fdisk-ask
 //! [56]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Ask.html#fdisk-asktype
