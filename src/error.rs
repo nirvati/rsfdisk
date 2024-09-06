@@ -11,6 +11,7 @@ use thiserror::Error;
 // From this library
 use crate::core::errors::ConversionError;
 use crate::core::errors::GenIteratorError;
+use crate::core::errors::HeaderEntryContentError;
 use crate::core::errors::ParserError;
 use crate::core::errors::PartitionBuilderError;
 use crate::core::errors::PartitionError;
@@ -49,6 +50,9 @@ pub enum RsFdiskError {
 
     #[error(transparent)]
     GenIterator(#[from] GenIteratorError),
+
+    #[error(transparent)]
+    HeaderEntryContent(#[from] HeaderEntryContentError),
 
     #[error(transparent)]
     Parser(#[from] ParserError),

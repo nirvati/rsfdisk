@@ -10,6 +10,7 @@
 // From this library
 pub use conversion_error_enum::ConversionError;
 pub use gen_iterator_error_enum::GenIteratorError;
+pub use header_entry_content_error_enum::HeaderEntryContentError;
 pub use parser_error_enum::ParserError;
 pub use partition_builder_error_enum::PartitionBuilderError;
 pub use partition_error_enum::PartitionError;
@@ -21,6 +22,7 @@ pub use prompt_error_enum::PromptError;
 
 mod conversion_error_enum;
 mod gen_iterator_error_enum;
+mod header_entry_content_error_enum;
 mod parser_error_enum;
 mod partition_builder_error_enum;
 mod partition_error_enum;
