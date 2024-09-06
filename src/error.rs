@@ -11,6 +11,7 @@ use thiserror::Error;
 // From this library
 use crate::core::errors::ConversionError;
 use crate::core::errors::ParserError;
+use crate::core::errors::PromptError;
 
 /// A specialized [`Result`](std::result::Result) type for `rsfdisk`.
 ///
@@ -41,4 +42,7 @@ pub enum RsFdiskError {
 
     #[error(transparent)]
     Parser(#[from] ParserError),
+
+    #[error(transparent)]
+    Prompt(#[from] PromptError),
 }
