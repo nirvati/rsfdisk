@@ -1,0 +1,371 @@
+<!DOCTYPE html> <html><!--
+ Page saved with SingleFile
+ url: https://man.openbsd.org/disktab.5
+--><meta charset=utf-8>
+<meta name=viewport content="width=device-width, initial-scale=1.0">
+<style>html{max-width:65em;--bg:#FFFFFF;--fg:#000000}body{background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif}h1,h2{font-size:110%}table{margin-top:0em;margin-bottom:0em;border-collapse:collapse}tbody{border-color:inherit}tr{border-color:inherit}td{vertical-align:top;padding-left:0.2em;padding-right:0.2em;border-color:inherit}dl{margin-bottom:0em}.permalink{border-bottom:thin dotted;color:inherit;font:inherit;text-decoration:inherit}*{clear:both}fieldset{border:thin solid silver;border-radius:1em;text-align:center}div[role=doc-pageheader]{display:flex;border-bottom:1px dotted #808080;margin-bottom:1em;font-size:smaller}.head-ltitle{flex:1}.head-vol{flex:0 1 auto;text-align:center}.head-rtitle{flex:1;text-align:right}div[role=doc-pagefooter]{display:flex;justify-content:space-between;border-top:1px dotted #808080;margin-top:1em;font-size:smaller}.foot-left{flex:1}.foot-date{flex:0 1 auto;text-align:center}.foot-os{flex:1;text-align:right}main{margin-left:3.8em}h2.Sh{margin-top:1.2em;margin-bottom:0.6em;margin-left:-3.2em}.Pp{margin:0.6em 0em}.Bl-tag{margin-left:5.5em}.Bl-tag>dt{float:left;margin-left:-5.5em;padding-right:0.5em;vertical-align:top}.Bl-tag>dd{clear:right;column-count:1;margin-top:0em;margin-left:0em;vertical-align:top}.Bl-compact{margin-top:0em}.Bl-compact>dd{margin-bottom:0em}.Bl-compact>dt{margin-top:0em}.Bl-column>tbody>tr>td{margin-top:1em}code.Nm{font-style:normal;font-weight:bold;font-family:inherit}.Pa{font-style:italic;font-weight:normal}.Dv{font-style:normal;font-weight:normal;font-family:monospace,monospace;font-size:0.9em}.Sy{font-style:normal;font-weight:bold}.Li{font-style:normal;font-weight:normal;font-family:monospace,monospace;font-size:0.9em}h2.Sh{position:relative}.Dv,.Nd,code.Nm,.Pa,.Sy,.Xr{position:relative}.Dv::before{content:"Dv"}.Nd::before{content:"Nd"}code.Nm::before{content:"Nm"}.Pa::before{content:"Pa"}h2.Sh::before{content:"Sh"}.Sy::before{content:"Sy"}.Xr::before{content:"Xr"}.An::before,.Ar::before,.Cd::before,.Cm::before,.Dv::before,.Em::before,.Er::before,.Ev::before,.Fa::before,.Fd::before,.Fl::before,.Fn::before,.Ft::before,.Ic::before,code.In::before,.Lb::before,.Lk::before,.Ms::before,.Mt::before,.Nd::before,code.Nm::before,.Pa::before,.Rs::before,h2.Sh::before,h3.Ss::before,.St::before,.Sx::before,.Sy::before,.Va::before,.Vt::before,.Xr::before{opacity:0;transition:.15s ease opacity;pointer-events:none;position:absolute;bottom:100%;box-shadow:0 0 .35em var(--fg);padding:.15em .25em;white-space:nowrap;font-family:Helvetica,Arial,sans-serif;font-style:normal;font-weight:bold;background:var(--bg);color:var(--fg)}.An:hover::before,.Ar:hover::before,.Cd:hover::before,.Cm:hover::before,.Dv:hover::before,.Em:hover::before,.Er:hover::before,.Ev:hover::before,.Fa:hover::before,.Fd:hover::before,.Fl:hover::before,.Fn:hover::before,.Ft:hover::before,.Ic:hover::before,code.In:hover::before,.Lb:hover::before,.Lk:hover::before,.Ms:hover::before,.Mt:hover::before,.Nd:hover::before,code.Nm:hover::before,.Pa:hover::before,.Rs:hover::before,h2.Sh:hover::before,h3.Ss:hover::before,.St:hover::before,.Sx:hover::before,.Sy:hover::before,.Va:hover::before,.Vt:hover::before,.Xr:hover::before{opacity:1;pointer-events:inherit}@media (max-width:37.5em){main{margin-left:0.5em}h2.Sh{margin-left:0em}.Bl-tag{margin-left:2em}.Bl-tag>dt{margin-left:-2em}}@media (prefers-color-scheme:dark){html{--bg:#1E1F21;--fg:#EEEFF1}:link{color:#BAD7FF}:visited{color:#F6BAFF}}</style>
+<title>disktab(5) - OpenBSD manual pages</title>
+<meta name=referrer content=no-referrer><link rel=canonical href=https://man.openbsd.org/disktab.5><meta http-equiv=content-security-policy content="default-src 'none'; font-src 'self' data:; img-src 'self' data:; style-src 'unsafe-inline'; media-src 'self' data:; script-src 'unsafe-inline' data:; object-src 'self' data:; frame-src 'self' data:;"><style>img[src="data:,"],source[src="data:,"]{display:none!important}</style></head>
+<body>
+<header>
+<section>
+<h1><a href=https://www.openbsd.org/>OpenBSD</a> manual page server</h1>
+</section>
+<form role=search action=/ autocomplete=off autocapitalize=none>
+ <fieldset>
+ <legend>Manual Page Search Parameters</legend>
+ <label>Search query:
+ <input type=search name=query value=disktab size=40>
+ </label>
+ <button type=submit name=apropos value=0>man</button>
+ <button type=submit name=apropos value=1>apropos</button>
+ <br>
+ <select name=sec aria-label="Manual section">
+ <option value=0>All Sections</option>
+ <option value=1>1 - General Commands</option>
+ <option value=2>2 - System Calls</option>
+ <option value=3>3 - Library Functions</option>
+ <option value=3p>3p - Perl Library</option>
+ <option value=4>4 - Device Drivers</option>
+ <option value=5 selected>5 - File Formats</option>
+ <option value=6>6 - Games</option>
+ <option value=7>7 - Miscellaneous Information</option>
+ <option value=8>8 - System Manager's Manual</option>
+ <option value=9>9 - Kernel Developer's Manual</option>
+ </select>
+ <select name=arch aria-label="CPU architecture">
+ <option value=default selected>All Architectures</option>
+ <option>amd64</option>
+ <option>alpha</option>
+ <option>armv7</option>
+ <option>arm64</option>
+ <option>hppa</option>
+ <option>i386</option>
+ <option>landisk</option>
+ <option>loongson</option>
+ <option>luna88k</option>
+ <option>macppc</option>
+ <option>mips64</option>
+ <option>octeon</option>
+ <option>powerpc64</option>
+ <option>riscv64</option>
+ <option>sparc64</option>
+ <option>amiga</option>
+ <option>arc</option>
+ <option>armish</option>
+ <option>arm32</option>
+ <option>atari</option>
+ <option>aviion</option>
+ <option>beagle</option>
+ <option>cats</option>
+ <option>hppa64</option>
+ <option>hp300</option>
+ <option>ia64</option>
+ <option>mac68k</option>
+ <option>mvme68k</option>
+ <option>mvme88k</option>
+ <option>mvmeppc</option>
+ <option>palm</option>
+ <option>pc532</option>
+ <option>pegasos</option>
+ <option>pmax</option>
+ <option>powerpc</option>
+ <option>sgi</option>
+ <option>socppc</option>
+ <option>solbourne</option>
+ <option>sparc</option>
+ <option>sun3</option>
+ <option>vax</option>
+ <option>wgrisc</option>
+ <option>x68k</option>
+ <option>zaurus</option>
+ </select>
+ <select name=manpath aria-label="Manual path">
+ <option selected>OpenBSD-current</option>
+ <option>OpenBSD-7.5</option>
+ <option>OpenBSD-7.4</option>
+ <option>OpenBSD-7.3</option>
+ <option>OpenBSD-7.2</option>
+ <option>OpenBSD-7.1</option>
+ <option>OpenBSD-7.0</option>
+ <option>OpenBSD-6.9</option>
+ <option>OpenBSD-6.8</option>
+ <option>OpenBSD-6.7</option>
+ <option>OpenBSD-6.6</option>
+ <option>OpenBSD-6.5</option>
+ <option>OpenBSD-6.4</option>
+ <option>OpenBSD-6.3</option>
+ <option>OpenBSD-6.2</option>
+ <option>OpenBSD-6.1</option>
+ <option>OpenBSD-6.0</option>
+ <option>OpenBSD-5.9</option>
+ <option>OpenBSD-5.8</option>
+ <option>OpenBSD-5.7</option>
+ <option>OpenBSD-5.6</option>
+ <option>OpenBSD-5.5</option>
+ <option>OpenBSD-5.4</option>
+ <option>OpenBSD-5.3</option>
+ <option>OpenBSD-5.2</option>
+ <option>OpenBSD-5.1</option>
+ <option>OpenBSD-5.0</option>
+ <option>OpenBSD-4.9</option>
+ <option>OpenBSD-4.8</option>
+ <option>OpenBSD-4.7</option>
+ <option>OpenBSD-4.6</option>
+ <option>OpenBSD-4.5</option>
+ <option>OpenBSD-4.4</option>
+ <option>OpenBSD-4.3</option>
+ <option>OpenBSD-4.2</option>
+ <option>OpenBSD-4.1</option>
+ <option>OpenBSD-4.0</option>
+ <option>OpenBSD-3.9</option>
+ <option>OpenBSD-3.8</option>
+ <option>OpenBSD-3.7</option>
+ <option>OpenBSD-3.6</option>
+ <option>OpenBSD-3.5</option>
+ <option>OpenBSD-3.4</option>
+ <option>OpenBSD-3.3</option>
+ <option>OpenBSD-3.2</option>
+ <option>OpenBSD-3.1</option>
+ <option>OpenBSD-3.0</option>
+ <option>OpenBSD-2.9</option>
+ <option>OpenBSD-2.8</option>
+ <option>OpenBSD-2.7</option>
+ <option>OpenBSD-2.6</option>
+ <option>OpenBSD-2.5</option>
+ <option>OpenBSD-2.4</option>
+ <option>OpenBSD-2.3</option>
+ <option>OpenBSD-2.2</option>
+ </select>
+ </fieldset>
+</form>
+</header>
+<hr>
+<div class=head role=doc-pageheader aria-label="Manual header
+  line"><span class=head-ltitle>DISKTAB(5)</span> <span class=head-vol>File
+ Formats Manual</span> <span class=head-rtitle>DISKTAB(5)</span></div>
+<main class=manual-text>
+<section class=Sh>
+<h2 class=Sh id=NAME><a class=permalink href=#NAME>NAME</a></h2>
+<p class=Pp><code class=Nm>disktab</code> —
+ <span class=Nd role=doc-subtitle>disk description file</span></p>
+</section>
+<section class=Sh>
+<h2 class=Sh id=DESCRIPTION><a class=permalink href=#DESCRIPTION>DESCRIPTION</a></h2>
+<p class=Pp><code class=Nm>disktab</code> is a simple database which
+ describes disk geometries and disk partition characteristics. It is used to
+ initialize the disk label on the disk. The format is patterned after the
+ <a class=Xr href=https://man.openbsd.org/termcap.5 aria-label="termcap, section
+    5">termcap(5)</a> terminal database. Entries in
+ <code class=Nm>disktab</code> consist of a number of colon
+ (‘<code class=Li>:</code>’) separated fields. The first
+ entry for each disk gives the names which are known for the disk, separated
+ by “|” characters. The last name given should be a long name
+ fully identifying the disk.</p>
+<p class=Pp>The following list indicates the normal values stored for each
+ disk entry:</p>
+<table class=Bl-column>
+ <tbody><tr id=Name>
+ <td><a class=permalink href=#Name><b class=Sy>Name</b></a></td>
+ <td><a class=permalink href=#Type><b class=Sy id=Type>Type</b></a></td>
+ <td><a class=permalink href=#Description><b class=Sy id=Description>Description</b></a></td>
+ </tr>
+ <tr>
+ <td>dt</td>
+ <td>str</td>
+ <td>Type of controller (e.g., SMD, ESDI, floppy).</td>
+ </tr>
+ <tr>
+ <td>ns</td>
+ <td>num</td>
+ <td>Number of sectors per track.</td>
+ </tr>
+ <tr>
+ <td>nt</td>
+ <td>num</td>
+ <td>Number of tracks per cylinder.</td>
+ </tr>
+ <tr>
+ <td>nc</td>
+ <td>num</td>
+ <td>Total number of cylinders on the disk.</td>
+ </tr>
+ <tr>
+ <td>sc</td>
+ <td>num</td>
+ <td>Number of sectors per cylinder (default: ns*nt).</td>
+ </tr>
+ <tr>
+ <td>su</td>
+ <td>num</td>
+ <td>Number of sectors per unit (default: sc*nc).</td>
+ </tr>
+ <tr>
+ <td>se</td>
+ <td>num</td>
+ <td>Sector size in bytes (default: <code class=Dv>DEV_BSIZE</code>).
+ <p class=Pp></p>
+ </td>
+ </tr>
+ <tr>
+ <td>ba</td>
+ <td>num</td>
+ <td>Block size for partition “a” (bytes).</td>
+ </tr>
+ <tr>
+ <td>bd</td>
+ <td>num</td>
+ <td>Block size for partition “d” (bytes).</td>
+ </tr>
+ <tr>
+ <td>be</td>
+ <td>num</td>
+ <td>Block size for partition “e” (bytes).</td>
+ </tr>
+ <tr>
+ <td>[...]</td>
+ <td></td>
+ <td></td>
+ </tr>
+ <tr>
+ <td>bp</td>
+ <td>num</td>
+ <td>Block size for partition “p” (bytes).
+ <p class=Pp></p>
+ </td>
+ </tr>
+ <tr>
+ <td>fa</td>
+ <td>num</td>
+ <td>Fragment size for partition “a” (bytes).</td>
+ </tr>
+ <tr>
+ <td>fd</td>
+ <td>num</td>
+ <td>Fragment size for partition “d” (bytes).</td>
+ </tr>
+ <tr>
+ <td>fe</td>
+ <td>num</td>
+ <td>Fragment size for partition “e” (bytes).</td>
+ </tr>
+ <tr>
+ <td>[...]</td>
+ <td></td>
+ <td></td>
+ </tr>
+ <tr>
+ <td>fp</td>
+ <td>num</td>
+ <td>Fragment size for partition “p” (bytes).
+ <p class=Pp></p>
+ </td>
+ </tr>
+ <tr>
+ <td>oa</td>
+ <td>num</td>
+ <td>Offset of partition “a” (sectors).</td>
+ </tr>
+ <tr>
+ <td>ob</td>
+ <td>num</td>
+ <td>Offset of partition “b” (sectors).</td>
+ </tr>
+ <tr>
+ <td>oc</td>
+ <td>num</td>
+ <td>Offset of partition “c” (sectors).</td>
+ </tr>
+ <tr>
+ <td>[...]</td>
+ <td></td>
+ <td></td>
+ </tr>
+ <tr>
+ <td>op</td>
+ <td>num</td>
+ <td>Offset of partition “p” (sectors).
+ <p class=Pp></p>
+ </td>
+ </tr>
+ <tr>
+ <td>pa</td>
+ <td>num</td>
+ <td>Size of partition “a” (sectors).</td>
+ </tr>
+ <tr>
+ <td>pb</td>
+ <td>num</td>
+ <td>Size of partition “b” (sectors).</td>
+ </tr>
+ <tr>
+ <td>pc</td>
+ <td>num</td>
+ <td>Size of partition “c” (sectors).</td>
+ </tr>
+ <tr>
+ <td>[...]</td>
+ <td></td>
+ <td></td>
+ </tr>
+ <tr>
+ <td>pp</td>
+ <td>num</td>
+ <td>Size of partition “p” (sectors).
+ <p class=Pp></p>
+ </td>
+ </tr>
+ <tr>
+ <td>ta</td>
+ <td>str</td>
+ <td>Type of partition “a” (4.2BSD, swap, etc.).</td>
+ </tr>
+ <tr>
+ <td>tb</td>
+ <td>str</td>
+ <td>Type of partition “b”.</td>
+ </tr>
+ <tr>
+ <td>tc</td>
+ <td>str</td>
+ <td>Type of partition “c”.</td>
+ </tr>
+ <tr>
+ <td>[...]</td>
+ <td></td>
+ <td></td>
+ </tr>
+ <tr>
+ <td>tp</td>
+ <td>str</td>
+ <td>Type of partition “p”.</td>
+ </tr>
+</table>
+</section>
+<section class=Sh>
+<h2 class=Sh id=FILES><a class=permalink href=#FILES>FILES</a></h2>
+<dl class="Bl-tag Bl-compact">
+ <dt><span class=Pa>/etc/disktab</span></dt>
+ <dd style=width:auto>&nbsp;</dd>
+</dl>
+</section>
+<section class=Sh>
+<h2 class=Sh id=SEE_ALSO><a class=permalink href=#SEE_ALSO>SEE
+ ALSO</a></h2>
+<p class=Pp><a class=Xr href=https://man.openbsd.org/getdiskbyname.3 aria-label="getdiskbyname,
+    section 3">getdiskbyname(3)</a>,
+ <a class=Xr href=https://man.openbsd.org/disklabel.5 aria-label="disklabel, section
+    5">disklabel(5)</a>,
+ <a class=Xr href=https://man.openbsd.org/disklabel.8 aria-label="disklabel, section
+    8">disklabel(8)</a>, <a class=Xr href=https://man.openbsd.org/newfs.8 aria-label="newfs,
+    section 8">newfs(8)</a></p>
+</section>
+<section class=Sh>
+<h2 class=Sh id=HISTORY><a class=permalink href=#HISTORY>HISTORY</a></h2>
+<p class=Pp>The <code class=Nm>disktab</code> description file appeared in
+ <span class=Ux>4.2BSD</span>.</p>
+</section>
+</main>
+<div class=foot role=doc-pagefooter aria-label="Manual footer
+  line"><span class=foot-left></span><span class=foot-date>November 7,
+ 2022</span> <span class=foot-os>OpenBSD-current</span></div>

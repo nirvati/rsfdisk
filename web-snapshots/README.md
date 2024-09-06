@@ -57,6 +57,8 @@ These tools were essential for collecting copies:
 
 [bsdlabel — read and write BSD label][25] [[a]][26]
 
+[disktab — disk description file][27] [[a]][28]
+
 [1]: https://wiki.alpinelinux.org/wiki/Repositories#Managing_repositories
 [2]: alpine-linux/managing-repositories.html
 [3]: https://unix.stackexchange.com/questions/751105/how-to-enable-automatic-login-in-alpine-linux-for-root
@@ -83,3 +85,5 @@ These tools were essential for collecting copies:
 [24]: web-snapshots/fs/construct-a-new-UFS1-UFS2-file-system.html
 [25]: https://www.gsp.com/cgi-bin/man.cgi?topic=BSDLABEL#SAVED_FILE_FORMAT
 [26]: web-snapshots/fs/read-and-write-BSD-label.html
+[27]: https://man.openbsd.org/disktab.5
+[28]: web-snapshots/fs/disktab-5-OpenBSD-manual-pages.html
