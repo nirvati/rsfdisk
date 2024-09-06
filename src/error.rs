@@ -11,6 +11,7 @@ use thiserror::Error;
 // From this library
 use crate::core::errors::ConversionError;
 use crate::core::errors::ParserError;
+use crate::core::errors::PartitionError;
 use crate::core::errors::PartitionKindBuilderError;
 use crate::core::errors::PartitionKindError;
 use crate::core::errors::PromptError;
@@ -44,6 +45,9 @@ pub enum RsFdiskError {
 
     #[error(transparent)]
     Parser(#[from] ParserError),
+
+    #[error(transparent)]
+    Partition(#[from] PartitionError),
 
     #[error(transparent)]
     PartitionKind(#[from] PartitionKindError),
