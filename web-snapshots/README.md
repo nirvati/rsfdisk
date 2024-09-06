@@ -51,6 +51,12 @@ These tools were essential for collecting copies:
 
 [GUID Partition Table][19] [[a]][20]
 
+## File system
+
+[newfs — construct a new UFS1/UFS2 file system][23] [[a]][24]
+
+[bsdlabel — read and write BSD label][25] [[a]][26]
+
 [1]: https://wiki.alpinelinux.org/wiki/Repositories#Managing_repositories
 [2]: alpine-linux/managing-repositories.html
 [3]: https://unix.stackexchange.com/questions/751105/how-to-enable-automatic-login-in-alpine-linux-for-root
@@ -73,3 +79,7 @@ These tools were essential for collecting copies:
 [20]: misc/guid-partition-table.html
 [21]: http://blog.sagetheprogrammer.com/neat-rust-tricks-passing-rust-closures-to-c
 [22]: web-snapshots/rust/passing-rust-closures-to-c.html
+[23]: https://www.gsp.com/cgi-bin/man.cgi?section=8&topic=newfs
+[24]: web-snapshots/fs/construct-a-new-UFS1-UFS2-file-system.html
+[25]: https://www.gsp.com/cgi-bin/man.cgi?topic=BSDLABEL#SAVED_FILE_FORMAT
+[26]: web-snapshots/fs/read-and-write-BSD-label.html
