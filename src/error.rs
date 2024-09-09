@@ -9,6 +9,7 @@ use thiserror::Error;
 // From standard library
 
 // From this library
+use crate::core::errors::ConversionError;
 use crate::core::errors::ParserError;
 
 /// A specialized [`Result`](std::result::Result) type for `rsfdisk`.
@@ -35,6 +36,9 @@ pub type Result<T> = std::result::Result<T, RsFdiskError>;
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum RsFdiskError {
+    #[error(transparent)]
+    Conversion(#[from] ConversionError),
+
     #[error(transparent)]
     Parser(#[from] ParserError),
 }
