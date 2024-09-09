@@ -8,3 +8,6 @@
 // From standard library
 
 // From this library
+pub use code_enum::Code;
+
+mod code_enum;
