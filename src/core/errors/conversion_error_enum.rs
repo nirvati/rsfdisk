@@ -12,6 +12,10 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum ConversionError {
+    /// Error while converting bytes into a [`Guid`](crate::core::partition::Guid).
+    #[error("{0}")]
+    Guid(String),
+
     /// Error while converting bytes into a [`Code`](crate::core::partition::Code).
     #[error("{0}")]
     Code(String),

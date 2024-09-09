@@ -9,5 +9,7 @@
 
 // From this library
 pub use code_enum::Code;
+pub use guid_enum::Guid;
 
 mod code_enum;
+mod guid_enum;
