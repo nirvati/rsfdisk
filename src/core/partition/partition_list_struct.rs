@@ -10,6 +10,7 @@ use std::mem::MaybeUninit;
 use crate::core::errors::PartitionListError;
 use crate::core::partition::Partition;
 use crate::core::partition::PartitionIter;
+use crate::core::partition::PartitionIterMut;
 use crate::owning_mut_from_ptr;
 use crate::owning_ref_from_ptr;
 
@@ -53,6 +54,10 @@ use crate::owning_ref_from_ptr;
 ///     for partition in list.iter() {
 ///         let partition_number = partition.number().unwrap();
 ///         assert!(partition_number > 0);
+///     }
+///
+///     for partition in list.iter_mut() {
+///         partition.set_size_in_sectors(128)?;
 ///     }
 ///
 ///     Ok(())
@@ -296,6 +301,15 @@ impl PartitionList {
     /// May panic if it fails to instantiate a new [`PartitionIter`].
     pub fn iter(&self) -> PartitionIter<'_> {
         PartitionIter::new(self).unwrap()
+    }
+
+    /// Returns a iterator over the [`Partition`]s in the list.
+    ///
+    /// # Panics
+    ///
+    /// May panic if it fails to instantiate a new [`PartitionIterMut`].
+    pub fn iter_mut(&self) -> PartitionIterMut<'_> {
+        PartitionIterMut::new(self).unwrap()
     }
 
     /// Returns a reference to the entry at `index` in the list, if `index` is not out of bounds.
@@ -934,6 +948,160 @@ mod tests {
 
         let actual = iter.next_back();
         assert!(actual.is_none());
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_mutably_iterate_forwards_over_an_empty_list() -> crate::Result<()> {
+        let list = PartitionList::new()?;
+
+        let mut iter = list.iter_mut();
+        let actual = iter.next();
+        assert!(actual.is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_mutably_iterate_backwards_over_an_empty_list() -> crate::Result<()> {
+        let list = PartitionList::new()?;
+
+        let mut iter = list.iter_mut();
+        let actual = iter.next_back();
+        assert!(actual.is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_mutably_get_the_nth_item() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        // Get the second item mutably
+        let mut iter = list.iter_mut();
+
+        let partition = iter.nth(1).unwrap();
+        let actual = partition.starting_sector();
+        let expected = Some(4096);
+        assert_eq!(actual, expected);
+
+        // Mutate second item
+        partition.set_starting_sector(1234)?;
+
+        // Get it again immutably
+        let mut iter = list.iter();
+
+        let actual = iter.nth(1).and_then(|p| p.starting_sector());
+        let expected = Some(1234);
+        assert_eq!(actual, expected);
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_mutably_iterate_forwards_over_a_list() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        for partition in list.iter() {
+            let actual = partition.size_in_sectors();
+            assert!(actual.is_none());
+        }
+
+        for partition in list.iter_mut() {
+            partition.set_size_in_sectors(128)?;
+        }
+
+        for partition in list.iter() {
+            let actual = partition.size_in_sectors();
+            let expected = Some(128);
+            assert_eq!(actual, expected);
+        }
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_mutably_iterate_backwards_over_a_list() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        for partition in list.iter() {
+            let actual = partition.size_in_sectors();
+            assert!(actual.is_none());
+        }
+
+        for partition in list.iter_mut().rev() {
+            partition.set_size_in_sectors(128)?;
+        }
+
+        for partition in list.iter() {
+            let actual = partition.size_in_sectors();
+            let expected = Some(128);
+            assert_eq!(actual, expected);
+        }
 
         let actual = list.len();
         let expected = 3;
