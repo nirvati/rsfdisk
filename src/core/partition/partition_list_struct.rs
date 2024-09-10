@@ -9,6 +9,7 @@ use std::mem::MaybeUninit;
 // From this library
 use crate::core::errors::PartitionListError;
 use crate::core::partition::Partition;
+use crate::core::partition::PartitionIter;
 use crate::owning_mut_from_ptr;
 use crate::owning_ref_from_ptr;
 
@@ -49,6 +50,10 @@ use crate::owning_ref_from_ptr;
 ///     assert_eq!(list.len(), 2);
 ///     assert_eq!(last.number(), Some(3));
 ///
+///     for partition in list.iter() {
+///         let partition_number = partition.number().unwrap();
+///         assert!(partition_number > 0);
+///     }
 ///
 ///     Ok(())
 /// }
@@ -282,6 +287,15 @@ impl PartitionList {
                 Some(ptr)
             }
         }
+    }
+
+    /// Returns a iterator over the [`Partition`]s in the list.
+    ///
+    /// # Panics
+    ///
+    /// May panic if it fails to instantiate a new [`PartitionIter`].
+    pub fn iter(&self) -> PartitionIter<'_> {
+        PartitionIter::new(self).unwrap()
     }
 
     /// Returns a reference to the entry at `index` in the list, if `index` is not out of bounds.
@@ -687,6 +701,242 @@ mod tests {
 
         let actual = list.get(2).and_then(|p| p.starting_sector());
         let expected = Some(8192);
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_iterate_forwards_over_an_empty_list() -> crate::Result<()> {
+        let list = PartitionList::new()?;
+
+        let mut iter = list.iter();
+        let actual = iter.next();
+        assert!(actual.is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_iterate_backwards_over_an_empty_list() -> crate::Result<()> {
+        let list = PartitionList::new()?;
+
+        let mut iter = list.iter();
+        let actual = iter.next_back();
+        assert!(actual.is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_get_the_nth_item() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        let mut iter = list.iter();
+
+        let actual = iter.nth(1).and_then(|p| p.starting_sector());
+        let expected = Some(4096);
+        assert_eq!(actual, expected);
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_iterate_forwards_over_a_list() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        let mut iter = list.iter();
+
+        let actual = iter.next().and_then(|p| p.starting_sector());
+        let expected = Some(64);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next().and_then(|p| p.starting_sector());
+        let expected = Some(4096);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next().and_then(|p| p.starting_sector());
+        let expected = Some(8192);
+        assert_eq!(actual, expected);
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_iterate_backwards_over_a_list() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        let mut iter = list.iter();
+
+        let actual = iter.next_back().and_then(|p| p.starting_sector());
+        let expected = Some(8192);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next_back().and_then(|p| p.starting_sector());
+        let expected = Some(4096);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next_back().and_then(|p| p.starting_sector());
+        let expected = Some(64);
+        assert_eq!(actual, expected);
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_alternate_forward_backward_iteration() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        let mut iter = list.iter();
+
+        let actual = iter.next().and_then(|p| p.starting_sector());
+        let expected = Some(64);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next_back().and_then(|p| p.starting_sector());
+        let expected = Some(8192);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next().and_then(|p| p.starting_sector());
+        let expected = Some(4096);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next_back();
+        assert!(actual.is_none());
+
+        let actual = iter.next();
+        assert!(actual.is_none());
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_alternate_backward_forward_iteration() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        let mut iter = list.iter();
+
+        let actual = iter.next_back().and_then(|p| p.starting_sector());
+        let expected = Some(8192);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next().and_then(|p| p.starting_sector());
+        let expected = Some(64);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next_back().and_then(|p| p.starting_sector());
+        let expected = Some(4096);
+        assert_eq!(actual, expected);
+
+        let actual = iter.next();
+        assert!(actual.is_none());
+
+        let actual = iter.next_back();
+        assert!(actual.is_none());
+
+        let actual = list.len();
+        let expected = 3;
         assert_eq!(actual, expected);
 
         Ok(())
