@@ -5,6 +5,7 @@
 
 // From standard library
 use std::mem::MaybeUninit;
+use std::ops::Index;
 
 // From this library
 use crate::core::errors::PartitionListError;
@@ -56,9 +57,12 @@ use crate::owning_ref_from_ptr;
 ///         assert!(partition_number > 0);
 ///     }
 ///
+///     assert_eq!(list[0].size_in_sectors(), None);
+///
 ///     for partition in list.iter_mut() {
 ///         partition.set_size_in_sectors(128)?;
 ///     }
+///     assert_eq!(list[0].size_in_sectors(), Some(128));
 ///
 ///     Ok(())
 /// }
@@ -462,6 +466,25 @@ impl PartitionList {
         );
 
         state
+    }
+}
+
+impl Index<usize> for PartitionList {
+    type Output = Partition;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        #[cold]
+        #[inline(never)]
+        #[track_caller]
+        fn indexing_failed() -> ! {
+            panic!("Index out of bounds");
+        }
+
+        let mut iter = PartitionIter::new(self).unwrap();
+        match iter.nth(index) {
+            Some(partition) => partition,
+            None => indexing_failed(),
+        }
     }
 }
 
@@ -1105,6 +1128,73 @@ mod tests {
 
         let actual = list.len();
         let expected = 3;
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    #[should_panic(expected = "Index out of bounds")]
+    fn partition_list_can_not_index_into_an_empty_list() {
+        let empty = PartitionList::new().unwrap();
+
+        let _ = empty[0];
+    }
+
+    #[test]
+    #[should_panic(expected = "Index out of bounds")]
+    fn partition_list_can_not_index_out_of_bounds() {
+        let partition1 = Partition::builder()
+            .number(1)
+            .starting_sector(64)
+            .build()
+            .unwrap();
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()
+            .unwrap();
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()
+            .unwrap();
+
+        let mut list = PartitionList::new().unwrap();
+        list.push(partition1).unwrap();
+        list.push(partition2).unwrap();
+        list.push(partition3).unwrap();
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        let _ = list[usize::MAX];
+    }
+
+    #[test]
+    fn partition_list_can_index_into_a_list() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        let actual = list[1].starting_sector();
+        let expected = Some(4096);
         assert_eq!(actual, expected);
 
         Ok(())
