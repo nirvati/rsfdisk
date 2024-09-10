@@ -6,6 +6,7 @@
 // From standard library
 use std::mem::MaybeUninit;
 use std::ops::Index;
+use std::ops::IndexMut;
 
 // From this library
 use crate::core::errors::PartitionListError;
@@ -42,8 +43,8 @@ use crate::owning_ref_from_ptr;
 ///         .build()?;
 ///
 ///     let mut list = PartitionList::new()?;
-///     list.push(partition2)?;
 ///     list.push(partition1)?;
+///     list.push(partition2)?;
 ///     list.push(partition3)?;
 ///
 ///     assert_eq!(list.len(), 3);
@@ -63,6 +64,11 @@ use crate::owning_ref_from_ptr;
 ///         partition.set_size_in_sectors(128)?;
 ///     }
 ///     assert_eq!(list[0].size_in_sectors(), Some(128));
+///
+///     assert_eq!(list[1].starting_sector(), Some(4096));
+///
+///     list[1].set_starting_sector(65536)?;
+///     assert_eq!(list[1].starting_sector(), Some(65536));
 ///
 ///     Ok(())
 /// }
@@ -481,6 +487,23 @@ impl Index<usize> for PartitionList {
         }
 
         let mut iter = PartitionIter::new(self).unwrap();
+        match iter.nth(index) {
+            Some(partition) => partition,
+            None => indexing_failed(),
+        }
+    }
+}
+
+impl IndexMut<usize> for PartitionList {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        #[cold]
+        #[inline(never)]
+        #[track_caller]
+        fn indexing_failed() -> ! {
+            panic!("Index out of bounds");
+        }
+
+        let mut iter = PartitionIterMut::new(self).unwrap();
         match iter.nth(index) {
             Some(partition) => partition,
             None => indexing_failed(),
@@ -1195,6 +1218,40 @@ mod tests {
 
         let actual = list[1].starting_sector();
         let expected = Some(4096);
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn partition_list_can_mutably_index_into_a_list() -> crate::Result<()> {
+        let partition1 = Partition::builder().number(1).starting_sector(64).build()?;
+        let partition2 = Partition::builder()
+            .number(2)
+            .starting_sector(4096)
+            .build()?;
+        let partition3 = Partition::builder()
+            .number(3)
+            .starting_sector(8192)
+            .build()?;
+
+        let mut list = PartitionList::new()?;
+        list.push(partition1)?;
+        list.push(partition2)?;
+        list.push(partition3)?;
+
+        let actual = list.len();
+        let expected = 3;
+        assert_eq!(actual, expected);
+
+        let actual = list[1].starting_sector();
+        let expected = Some(4096);
+        assert_eq!(actual, expected);
+
+        list[1].set_starting_sector(65536)?;
+
+        let actual = list[1].starting_sector();
+        let expected = Some(65536);
         assert_eq!(actual, expected);
 
         Ok(())
