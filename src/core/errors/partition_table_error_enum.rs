@@ -13,6 +13,10 @@ use std::ffi::NulError;
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum PartitionTableError {
+    /// Error while configuring a new [`PartitionTable`](crate::core::partition_table::PartitionTable) instance.
+    #[error("{0}")]
+    Config(String),
+
     /// Error while converting from one type to another.
     #[error("{0}")]
     Conversion(String),
