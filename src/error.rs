@@ -14,6 +14,7 @@ use crate::core::errors::GenIteratorError;
 use crate::core::errors::ParserError;
 use crate::core::errors::PartitionBuilderError;
 use crate::core::errors::PartitionError;
+use crate::core::errors::PartitionIterError;
 use crate::core::errors::PartitionKindBuilderError;
 use crate::core::errors::PartitionKindError;
 use crate::core::errors::PartitionListError;
@@ -57,6 +58,9 @@ pub enum RsFdiskError {
 
     #[error(transparent)]
     PartitionBuilder(#[from] PartitionBuilderError),
+
+    #[error(transparent)]
+    PartitionIter(#[from] PartitionIterError),
 
     #[error(transparent)]
     PartitionKind(#[from] PartitionKindError),
