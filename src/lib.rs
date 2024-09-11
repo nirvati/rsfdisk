@@ -676,18 +676,18 @@
 //!
 //! #### UEFI GPT
 //!
-//! | `libfdisk`                             | `rsfdisk` |
-//! | ------------------                     | --------- |
-//! | [`GPT_FLAG_REQUIRED`][278]             |           |
-//! | [`GPT_FLAG_NOBLOCK`][279]              |           |
-//! | [`GPT_FLAG_LEGACYBOOT`][280]           |           |
-//! | [`GPT_FLAG_GUIDSPECIFIC`][281]         |           |
-//! | [`fdisk_gpt_is_hybrid`][282]           |           |
-//! | [`fdisk_gpt_get_partition_attrs`][283] |           |
-//! | [`fdisk_gpt_set_partition_attrs`][284] |           |
-//! | [`fdisk_gpt_set_npartitions`][285]     |           |
-//! | [`fdisk_gpt_disable_relocation`][286]  |           |
-//! | [`fdisk_gpt_enable_minimize`][287]     |           |
+//! | `libfdisk`                             | `rsfdisk`                                                                                                                                                                                                                                                                                                          |
+//! | ------------------                     | ---------                                                                                                                                                                                                                                                                                                          |
+//! | [`GPT_FLAG_REQUIRED`][278]             |                                                                                                                                                                                                                                                                                                                    |
+//! | [`GPT_FLAG_NOBLOCK`][279]              |                                                                                                                                                                                                                                                                                                                    |
+//! | [`GPT_FLAG_LEGACYBOOT`][280]           |                                                                                                                                                                                                                                                                                                                    |
+//! | [`GPT_FLAG_GUIDSPECIFIC`][281]         |                                                                                                                                                                                                                                                                                                                    |
+//! | [`fdisk_gpt_is_hybrid`][282]           |                                                                                                                                                                                                                                                                                                                    |
+//! | [`fdisk_gpt_get_partition_attrs`][283] |                                                                                                                                                                                                                                                                                                                    |
+//! | [`fdisk_gpt_set_partition_attrs`][284] |                                                                                                                                                                                                                                                                                                                    |
+//! | [`fdisk_gpt_set_npartitions`][285]     |                                                                                                                                                                                                                                                                                                                    |
+//! | [`fdisk_gpt_disable_relocation`][286]  | [`PartitionTableGPTExt::gpt_enable_backup_header_relocation`](crate::core::partition_table::PartitionTableGPTExt::gpt_enable_backup_header_relocation)<br>[`PartitionTableGPTExt::gpt_disable_backup_header_relocation`](crate::core::partition_table::PartitionTableGPTExt::gpt_disable_backup_header_relocation) |
+//! | [`fdisk_gpt_enable_minimize`][287]     | [`PartitionTableGPTExt::gpt_enable_minimize_footprint`](crate::core::partition_table::PartitionTableGPTExt::gpt_enable_minimize_footprint)<br>[`PartitionTableGPTExt::gpt_disable_minimize_footprint`](crate::core::partition_table::PartitionTableGPTExt::gpt_disable_minimize_footprint)                         |
 //!
 //! [278]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-UEFI-GPT.html#GPT-FLAG-REQUIRED:CAPS
 //! [279]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-UEFI-GPT.html#GPT-FLAG-NOBLOCK:CAPS
