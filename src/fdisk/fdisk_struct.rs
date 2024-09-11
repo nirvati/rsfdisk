@@ -17,6 +17,7 @@ use crate::fdisk::FdiskBuilder;
 use crate::fdisk::FdiskError;
 use crate::fdisk::GcItem;
 use crate::fdisk::SizeFormat;
+use crate::ffi_to_string_or_empty;
 use crate::ffi_utils;
 
 /// Partition table reader/editor/creator.
@@ -993,32 +994,6 @@ impl<'a> Fdisk<'a> {
         offset
     }
 
-    /// Returns the name of the already existing file system or partition table detected.
-    pub fn device_describe_collisions(&self) -> Option<&str> {
-        log::debug!("Fdisk::device_describe_collisions describing metadata collisions");
-        let mut ptr = MaybeUninit::<*const libc::c_char>::zeroed();
-        unsafe {
-            ptr.write(libfdisk::fdisk_get_collision(self.inner));
-        }
-
-        match unsafe { ptr.assume_init() } {
-            ptr if ptr.is_null() => {
-                log::debug!("Fdisk::device_describe_collisions found no metadata conflict. libfdisk::fdisk_get_collision returned a NULL pointer");
-
-                None
-            }
-            desc_ptr => {
-                let collisions = ffi_utils::const_char_array_to_str_ref(desc_ptr).ok();
-                log::debug!(
-                    "Fdisk::device_describe_collisions found collisions for: {:?}",
-                    collisions
-                );
-
-                collisions
-            }
-        }
-    }
-
     /// Returns the underlying file descriptor associated with the assigned device.
     ///
     /// # Safety
@@ -1218,6 +1193,225 @@ impl<'a> Fdisk<'a> {
         );
 
         size
+    }
+
+    /// Returns `true` if the caller answers `yes` to the `question`.
+    pub fn ask_yes_no_question<T>(&self, question: T) -> Result<bool, FdiskError>
+    where
+        T: AsRef<str>,
+    {
+        let question = question.as_ref();
+        let question_cstr = ffi_utils::as_ref_str_to_c_string(question)?;
+        log::debug!(
+            "Fdisk::ask_yes_no_question asking yes/no question: {:?}",
+            question
+        );
+
+        let mut answer = MaybeUninit::<libc::c_int>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_ask_yesno(self.inner, question_cstr.as_ptr(), answer.as_mut_ptr())
+        };
+
+        match result {
+            0 => {
+                let answer = unsafe { answer.assume_init() };
+                let answer_str = if answer == 1 {
+                    "yes".to_owned()
+                } else {
+                    "no".to_owned()
+                };
+                log::debug!("Fdisk::ask_yes_no_question got answer: {:?}", answer_str);
+
+                Ok(answer == 1)
+            }
+            code => {
+                let err_msg = format!("failed to get answer to question: {:?}", question);
+                log::debug!("Fdisk::ask_yes_no_question {}. libfdisk::fdisk_ask_yesno returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Prompt(err_msg))
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Asks the user for a partition number on the console.
+    fn request_partition_number(
+        ptr: *mut libfdisk::fdisk_context,
+        want_new: libc::c_int,
+    ) -> Result<usize, FdiskError> {
+        let op_str = if want_new == 0 {
+            "used".to_owned()
+        } else {
+            "unused".to_owned()
+        };
+        log::debug!(
+            "Fdisk::request_partition_number requesting {} partition number",
+            op_str
+        );
+
+        let mut partition_number = MaybeUninit::<usize>::zeroed();
+
+        let result =
+            unsafe { libfdisk::fdisk_ask_partnum(ptr, partition_number.as_mut_ptr(), want_new) };
+
+        match result {
+            0 => {
+                let partition_number = unsafe { partition_number.assume_init() };
+                log::debug!(
+                    "Fdisk::request_partition_number got {} partition number: {:?}",
+                    op_str,
+                    partition_number
+                );
+
+                Ok(partition_number)
+            }
+            1 => {
+                let err_msg = format!("no {} partition number available", op_str);
+                log::debug!("Fdisk::request_partition_number {}", err_msg);
+
+                Err(FdiskError::Prompt(err_msg))
+            }
+            code => {
+                let err_msg = match -code {
+                    libc::ENOMEM => "out of memory".to_owned(),
+                    _ => format!("failed to request {} partition number", op_str),
+                };
+
+                log::debug!("Fdisk::request_partition_number {}. libfdisk::fdisk_ask_partnum returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Prompt(err_msg))
+            }
+        }
+    }
+
+    /// Asks the caller for a used partition number.
+    pub fn ask_partition_number_used(&self) -> Result<usize, FdiskError> {
+        Self::request_partition_number(self.inner, 0)
+    }
+
+    /// Asks the caller for an unused partition number.
+    pub fn ask_partition_number_unused(&self) -> Result<usize, FdiskError> {
+        Self::request_partition_number(self.inner, 1)
+    }
+
+    /// Prompts the caller for a numerical value.
+    pub fn ask_number_in_range<T>(
+        &self,
+        question: T,
+        default_value: u64,
+        lower_bound: u64,
+        upper_bound: u64,
+    ) -> Result<libfdisk::uintmax_t, FdiskError>
+    where
+        T: AsRef<str>,
+    {
+        log::debug!(
+            "Fdisk::ask_number_in_range requesting value in range [{:?}, {:?}] (default: {:?})",
+            lower_bound,
+            upper_bound,
+            default_value
+        );
+        let question = question.as_ref();
+        let question_cstr = ffi_utils::as_ref_str_to_c_string(question)?;
+
+        let mut ptr = MaybeUninit::<libfdisk::uintmax_t>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_ask_number(
+                self.inner,
+                lower_bound,
+                default_value,
+                upper_bound,
+                question_cstr.as_ptr(),
+                ptr.as_mut_ptr(),
+            )
+        };
+
+        match result {
+            0 => {
+                let obtained = unsafe { ptr.assume_init() };
+                log::debug!("Fdisk::ask_number_in_range got value: {:?}", obtained);
+
+                Ok(obtained)
+            }
+            code => {
+                let err_msg = match -code {
+                    libc::ENOMEM => "out of memory".to_owned(),
+                    _ => format!(
+                        "error while requesting value in range [{:?}, {:?}] (default: {:?})",
+                        lower_bound, upper_bound, default_value
+                    ),
+                };
+
+                log::debug!("Fdisk::ask_number_in_range {}. libfdisk::fdisk_ask_number returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Prompt(err_msg))
+            }
+        }
+    }
+
+    /// Prompts the caller for a string value.
+    pub fn ask_string_value<T>(&self, question: T) -> Result<String, FdiskError>
+    where
+        T: AsRef<str>,
+    {
+        log::debug!("Fdisk::ask_string_value requesting string value");
+        let question = question.as_ref();
+        let question_cstr = ffi_utils::as_ref_str_to_c_string(question)?;
+
+        let mut ptr = MaybeUninit::<*mut libc::c_char>::zeroed();
+
+        let result = unsafe {
+            libfdisk::fdisk_ask_string(self.inner, question_cstr.as_ptr(), ptr.as_mut_ptr())
+        };
+
+        match result {
+            0 => {
+                let answer_ptr = unsafe { ptr.assume_init() };
+                let answer = ffi_to_string_or_empty!(answer_ptr);
+
+                log::debug!("Fdisk::ask_string_value got string value: {:?}", answer);
+
+                Ok(answer)
+            }
+            code => {
+                let err_msg = match -code {
+                    libc::ENOMEM => "out of memory".to_owned(),
+                    _ => "failed to request a string value".to_owned(),
+                };
+
+                log::debug!("Fdisk::ask_string_value {}. libfdisk::fdisk_ask_string returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Prompt(err_msg))
+            }
+        }
+    }
+
+    /// Returns the name of the already existing file system or partition table detected.
+    pub fn device_describe_collisions(&self) -> Option<&str> {
+        log::debug!("Fdisk::device_describe_collisions describing metadata collisions");
+        let mut ptr = MaybeUninit::<*const libc::c_char>::zeroed();
+        unsafe {
+            ptr.write(libfdisk::fdisk_get_collision(self.inner));
+        }
+
+        match unsafe { ptr.assume_init() } {
+            ptr if ptr.is_null() => {
+                log::debug!("Fdisk::device_describe_collisions found no metadata conflict. libfdisk::fdisk_get_collision returned a NULL pointer");
+
+                None
+            }
+            desc_ptr => {
+                let collisions = ffi_utils::const_char_array_to_str_ref(desc_ptr).ok();
+                log::debug!(
+                    "Fdisk::device_describe_collisions found collisions for: {:?}",
+                    collisions
+                );
+
+                collisions
+            }
+        }
     }
 
     //---- END getters

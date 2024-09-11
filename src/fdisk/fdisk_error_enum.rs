@@ -40,4 +40,8 @@ pub enum FdiskError {
     /// Error while printing log messages.
     #[error("{0}")]
     Log(String),
+
+    /// Error while reading the answer to a prompt.
+    #[error("{0}")]
+    Prompt(String),
 }
