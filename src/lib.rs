@@ -42,8 +42,7 @@
 //! ## API structure
 //!
 //! `rsfdisk`'s API is roughly divided into two parts:
-//! - `fdisk`: the main library module holding the `Fdisk` struct to create/edit/modify partition
-//! tables,
+//! - [`fdisk`]: the main library module holding the `Fdisk` struct to create/edit/modify partition
 //! - [`core`]: the module holding specialised objects used and/or returned by `Fdisk`.
 //!
 //! Finally, look to the [`debug`] module if you need diagnostics during development.
@@ -800,4 +799,5 @@ pub use error::*;
 pub mod core;
 pub mod debug;
 mod error;
+pub mod fdisk;
 pub(crate) mod ffi_utils;
