@@ -8,3 +8,7 @@
 // From standard library
 
 // From this library
+
+pub use device_addressing_enum::DeviceAddressing;
+
+mod device_addressing_enum;
