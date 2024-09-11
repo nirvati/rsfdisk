@@ -718,12 +718,12 @@
 //!
 //! #### SGI
 //!
-//! | `libfdisk`                      | `rsfdisk` |
-//! | ------------------              | --------- |
-//! | [`SGI_FLAG_BOOT`][293]          |           |
-//! | [`SGI_FLAG_SWAP`][294]          |           |
-//! | [`fdisk_sgi_create_info`][295]  |           |
-//! | [`fdisk_sgi_set_bootfile`][296] |           |
+//! | `libfdisk`                      | `rsfdisk`                                                |
+//! | ------------------              | ---------                                                |
+//! | [`SGI_FLAG_BOOT`][293]          | [`SGIFlag::Boot`](crate::core::partition::SGIFlag::Boot) |
+//! | [`SGI_FLAG_SWAP`][294]          | [`SGIFlag::Swap`](crate::core::partition::SGIFlag::Swap) |
+//! | [`fdisk_sgi_create_info`][295]  |                                                          |
+//! | [`fdisk_sgi_set_bootfile`][296] |                                                          |
 //!
 //! [293]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-SGI.html#SGI-FLAG-BOOT:CAPS
 //! [294]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-SGI.html#SGI-FLAG-SWAP:CAPS

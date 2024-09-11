@@ -21,6 +21,7 @@ pub use partition_kind_builder_struct::PartitionKindBuilder;
 pub use partition_kind_struct::PartitionKind;
 pub use partition_list_struct::PartitionList;
 pub use partition_struct::Partition;
+pub use sgi_flag_enum::SGIFlag;
 
 mod code_enum;
 mod dos_flag_enum;
@@ -33,3 +34,4 @@ mod partition_kind_builder_struct;
 mod partition_kind_struct;
 mod partition_list_struct;
 mod partition_struct;
+mod sgi_flag_enum;
