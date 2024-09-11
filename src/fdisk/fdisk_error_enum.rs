@@ -33,6 +33,10 @@ pub enum FdiskError {
     #[error("failed to convert value to `CString`: {}", .0)]
     CStringConversion(#[from] NulError),
 
+    /// Error while aligning data to block sector boundaries on disk.
+    #[error("{0}")]
+    DataAlignment(String),
+
     /// Input/Output runtime errors.
     #[error(transparent)]
     IoError(#[from] std::io::Error),
@@ -41,7 +45,19 @@ pub enum FdiskError {
     #[error("{0}")]
     Log(String),
 
+    /// Error while overriding `Fdisk` attributes in memory.
+    #[error("{0}")]
+    Override(String),
+
     /// Error while reading the answer to a prompt.
     #[error("{0}")]
     Prompt(String),
+
+    /// Error while restoring `Fdisk` attributes from their saved values on disk.
+    #[error("{0}")]
+    Restore(String),
+
+    /// Error while saving `Fdisk` attributes.
+    #[error("{0}")]
+    Save(String),
 }

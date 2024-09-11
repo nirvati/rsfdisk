@@ -16,7 +16,9 @@ use crate::fdisk::DeviceAddressing;
 use crate::fdisk::FdiskBuilder;
 use crate::fdisk::FdiskError;
 use crate::fdisk::GcItem;
+use crate::fdisk::LBAAlign;
 use crate::fdisk::SizeFormat;
+
 use crate::ffi_to_string_or_empty;
 use crate::ffi_utils;
 
@@ -615,6 +617,102 @@ impl<'a> Fdisk<'a> {
         Self::wipe_metadata(self, false)
     }
 
+    #[doc(hidden)]
+    /// Overrides the values collected by the scanner run after a device is assigned to a
+    /// `Fdisk`, then saves the new values.
+    pub(crate) fn save_device_geometry_overrides(
+        &mut self,
+        cylinders: u32,
+        heads: u32,
+        sectors: u32,
+    ) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::save_device_geometry_overrides saving device geometry overrides cylinders: {:?}, heads: {:?}, sectors: {:?} values", cylinders, heads, sectors);
+
+        let result =
+            unsafe { libfdisk::fdisk_save_user_geometry(self.inner, cylinders, heads, sectors) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::save_device_geometry_overrides saved device geometry overrides cylinders: {:?}, heads: {:?}, sectors: {:?} values", cylinders, heads, sectors);
+                Ok(())
+            }
+            code => {
+                let err_msg = format!("failed to save device geometry overrides cylinders: {:?}, heads: {:?}, sectors: {:?} values", cylinders, heads, sectors);
+                log::debug!("Fdisk::save_device_geometry_overrides {}. libfdisk::fdisk_override_geometry returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Save(err_msg))
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Saves a value overriding the device's grain size. The device grain size is used to
+    /// align partitions, and is by default equal to the optimal I/O size or 1 MiB, whichever is the
+    /// largest.
+    ///
+    /// If the given `size` is too small, this `Fdisk` will use the largest value between the
+    /// device's physical sector size and the minimum I/O size.
+    pub(crate) fn save_device_grain_size_override(&mut self, size: u64) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::save_device_grain_size_override saving device grain size (bytes): {:?}",
+            size
+        );
+
+        let result = unsafe { libfdisk::fdisk_save_user_grain(self.inner, size) };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::save_device_grain_size_override saved device grain size (bytes): {:?}",
+                    size
+                );
+
+                Ok(())
+            }
+            code => {
+                let err_msg = format!("failed to save device grain size (bytes): {:?}", size);
+                log::debug!("Fdisk::save_device_grain_size_override {}. libfdisk::fdisk_save_user_grain returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Save(err_msg))
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Overrides the assigned device's logical and physical sectors sizes in bytes.
+    pub(crate) fn save_device_sector_overrides(
+        &mut self,
+        physical_sector_size: u32,
+        logical_sector_size: u32,
+    ) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::save_device_sector_overrides saving sector size overrides (bytes) physical: {:?}, logical: {:?}", physical_sector_size, logical_sector_size);
+
+        let result = unsafe {
+            libfdisk::fdisk_save_user_sector_size(
+                self.inner,
+                physical_sector_size,
+                logical_sector_size,
+            )
+        };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::save_device_sector_overrides saved sector size overrides (bytes) physical: {:?}, logical: {:?}", physical_sector_size, logical_sector_size);
+
+                Ok(())
+            }
+            code => {
+                let err_msg = format!(
+                    "failed to save sector size overrides (bytes) physical: {:?}, logical: {:?}",
+                    physical_sector_size, logical_sector_size
+                );
+                log::debug!("Fdisk::save_device_sector_overrides {}. libfdisk::fdisk_save_user_sector_size returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Save(err_msg))
+            }
+        }
+    }
+
     //---- END setters
 
     /// Creates a [`FdiskBuilder`] to configure and construct a new `Fdisk` instance.
@@ -726,6 +824,10 @@ impl<'a> Fdisk<'a> {
     /// where the first partition may be located at a peculiar offset. It is **strongly**
     /// recommended to stick to the library's default settings.
     ///
+    /// **Note:** The location of the first logical sector is always reset to the library's defaults
+    /// after calling [`Fdisk::override_device_geometry`] or
+    /// [`Fdisk::restore_default_lba_alignment`].
+    ///
     /// **Caution:** This function modifies the in-memory partition table only, it does NOT update
     /// on-disk values. For example, a GPT Header contains `FirstUsableLBA` and `LastUsableLBA`
     /// fields that will not be updated.
@@ -762,6 +864,10 @@ impl<'a> Fdisk<'a> {
     /// Header at the end of the disk which reduces the total number of sectors available.
     ///
     /// **Warning:** It is **strongly** recommended to stick to the library's default settings.
+    ///
+    /// **Note:** The location of the last logical sector is always reset to the library's defaults
+    /// after calling [`Fdisk::override_device_geometry`] or
+    /// [`Fdisk::restore_default_lba_alignment`].
     pub fn device_set_last_lba(&mut self, address: u64) -> Result<(), FdiskError> {
         log::debug!("Fdisk::device_set_last_lba setting last logical block address");
 
@@ -781,6 +887,163 @@ impl<'a> Fdisk<'a> {
                 log::debug!("Fdisk::device_set_last_lba {}. libfdisk::fdisk_set_last_lba returned error code: {:?}", err_msg, code);
 
                 Err(FdiskError::Config(err_msg))
+            }
+        }
+    }
+
+    #[doc(hidden)]
+    /// Align the LBA address to multiple of the device grain size.
+    fn align_lba(fdisk: &mut Self, address: u64, direction: LBAAlign) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::align_lba aligning LBA {} to address: {:?}",
+            direction,
+            address
+        );
+
+        let result = unsafe { libfdisk::fdisk_align_lba(fdisk.inner, address, direction.into()) };
+
+        match result {
+            0 => {
+                log::debug!(
+                    "Fdisk::align_lba aligned LBA {} to address: {:?}",
+                    direction,
+                    address
+                );
+
+                Ok(())
+            }
+            code => {
+                let err_msg = format!(
+                    "failed to align LBA {} to address: {:?}",
+                    direction, address
+                );
+                log::debug!(
+                    "Fdisk::align_lba {}. libfdisk::fdisk_align_lba returned error code: {:?}",
+                    err_msg,
+                    code
+                );
+
+                Err(FdiskError::DataAlignment(err_msg))
+            }
+        }
+    }
+
+    /// Aligns the LBA to the next block/sector boundary.
+    ///
+    /// If the assigned device uses an alignment offset, the LBA is placed on the next physical
+    /// sector boundary.
+    pub fn align_lba_up(&mut self, address: u64) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::align_lba_up aligning LBA up to the address: {:?}",
+            address
+        );
+
+        Self::align_lba(self, address, LBAAlign::Up)
+    }
+
+    /// Aligns the LBA to the previous block/sector boundary.
+    ///
+    /// If the assigned device uses an alignment offset, the LBA is placed on the previous physical
+    /// sector boundary.
+    pub fn align_lba_down(&mut self, address: u64) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::align_lba_down aligning LBA down to the address: {:?}",
+            address
+        );
+
+        Self::align_lba(self, address, LBAAlign::Down)
+    }
+
+    /// Aligns the LBA to the nearest block/sector boundary.
+    ///
+    /// If the assigned device uses an alignment offset, the LBA is placed on the nearest physical
+    /// sector boundary.
+    pub fn align_lba_nearest(&mut self, address: u64) -> Result<(), FdiskError> {
+        log::debug!(
+            "Fdisk::align_lba_nearest aligning LBA nearest to the address: {:?}",
+            address
+        );
+
+        Self::align_lba(self, address, LBAAlign::Nearest)
+    }
+
+    /// Returns the value of the aligned LBA address in the given sector range.
+    pub fn align_lba_in_range(&mut self, lba: u64, lower_bound: u64, upper_bound: u64) -> u64 {
+        let address = unsafe {
+            libfdisk::fdisk_align_lba_in_range(self.inner, lba, lower_bound, upper_bound)
+        };
+        log::debug!("Fdisk::align_lba_in_range address: {:?}", address);
+
+        address
+    }
+
+    /// Temporarily overrides the assigned device's geometry. Call the
+    /// [`Fdisk::restore_device_properties`] method to reset this `Fdisk` to its initial values.
+    pub fn override_device_geometry(
+        &mut self,
+        cylinders: u32,
+        heads: u32,
+        sectors: u32,
+    ) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::override_device_geometry overriding device geometry with new cylinders: {:?}, heads: {:?}, sectors: {:?} values", cylinders, heads, sectors);
+
+        let result =
+            unsafe { libfdisk::fdisk_override_geometry(self.inner, cylinders, heads, sectors) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::override_device_geometry overrode device geometry with new cylinders: {:?}, heads: {:?}, sectors: {:?} values", cylinders, heads, sectors);
+                Ok(())
+            }
+            code => {
+                let err_msg = format!("failed to override device geometry with new cylinders: {:?}, heads: {:?}, sectors: {:?} values", cylinders, heads, sectors);
+                log::debug!("Fdisk::override_device_geometry {}. libfdisk::fdisk_override_geometry returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Override(err_msg))
+            }
+        }
+    }
+
+    /// Resets LBA alignment to its default value (specific to each type of partition table).
+    pub fn restore_default_lba_alignment(&mut self) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::restore_default_lba_alignment restoring default LBA alignment");
+
+        let result = unsafe { libfdisk::fdisk_reset_alignment(self.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::restore_default_lba_alignment restored default LBA alignment");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to restore default LBA alignment".to_owned();
+                log::debug!("Fdisk::restore_default_lba_alignment {}. libfdisk::fdisk_reset_alignment returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Restore(err_msg))
+            }
+        }
+    }
+
+    /// Restores LBA alignment, device geometry, grain size, and sector sizes. The method rereads
+    /// values from metadata on the assigned device, then applies the property overrides set by
+    /// [`FdiskBuilder`], if any.
+    pub fn restore_device_properties(&mut self) -> Result<(), FdiskError> {
+        log::debug!("Fdisk::restore_device_properties resetting device properties");
+
+        let result = unsafe { libfdisk::fdisk_reset_device_properties(self.inner) };
+
+        match result {
+            0 => {
+                log::debug!("Fdisk::restore_device_properties reset device properties");
+
+                Ok(())
+            }
+            code => {
+                let err_msg = "failed to reset device properties".to_owned();
+                log::debug!("Fdisk::restore_device_properties {}. libfdisk::fdisk_restore_device_properties returned error code: {:?}", err_msg, code);
+
+                Err(FdiskError::Restore(err_msg))
             }
         }
     }
@@ -1418,6 +1681,22 @@ impl<'a> Fdisk<'a> {
 
     //---- BEGIN predicates
 
+    /// Returns `true` if the user has overridden some device properties.
+    pub fn has_overriden_device_properties(&self) -> bool {
+        let state = unsafe { libfdisk::fdisk_has_user_device_properties(self.inner) == 1 };
+        log::debug!("Fdisk::has_overriden_device_properties value: {:?}", state);
+
+        state
+    }
+
+    /// Returns `true` the `LBA` is aligned to a physical sector boundary.
+    pub fn is_lba_physically_aligned(&self, lba: u64) -> bool {
+        let state = unsafe { libfdisk::fdisk_lba_is_phy_aligned(self.inner, lba) == 1 };
+        log::debug!("Fdisk::is_lba_physically_aligned value: {:?}", state);
+
+        state
+    }
+
     /// Returns `true` when this `Fdisk` is set to display each partition's detailed metadata when
     /// printing on the console.
     pub fn displays_partition_details(&self) -> bool {
@@ -2014,6 +2293,111 @@ mod tests {
         let actual = disk.device_alignment_offset();
         let expected = 0;
         assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
+    fn fdisk_can_override_device_geometry() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("gpt");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let default_cylinders = disk.device_count_cylinders();
+        let default_heads = disk.device_count_heads();
+        let default_sectors = disk.device_count_sectors();
+
+        let cylinders = 12;
+        let heads = 64;
+        let sectors = 32;
+        let disk = Fdisk::builder()
+            .assign_device(tmp_image.path())
+            .device_geometry(cylinders, heads, sectors)
+            .build()?;
+
+        let actual = disk.has_overriden_device_properties();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        // FIXME the tests below fail with the actual != expected. How does a user
+        // access the overridden values?
+        let actual = disk.device_count_cylinders();
+        let expected = cylinders as u64;
+        assert_eq!(actual, expected);
+        assert_ne!(actual, default_cylinders);
+
+        let actual = disk.device_count_heads();
+        let expected = heads as u64;
+        assert_eq!(actual, expected);
+        assert_ne!(actual, default_heads);
+
+        let actual = disk.device_count_sectors();
+        let expected = sectors as u64;
+        assert_eq!(actual, expected);
+        assert_ne!(actual, default_sectors);
+
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
+    fn fdisk_can_override_sector_sizes() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("gpt");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let default_phys_size = disk.device_bytes_per_physical_sector();
+        let default_logi_size = disk.device_bytes_per_logical_sector();
+
+        let phys_size = 4096; // 4 KiB
+        let logi_size = 1024; // 1 KiB
+        let disk = Fdisk::builder()
+            .assign_device(tmp_image.path())
+            .device_sector_sizes(phys_size, logi_size)
+            .build()?;
+
+        let actual = disk.has_overriden_device_properties();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        // FIXME the tests below fail with the actual != expected. How does a user
+        // access the overridden values?
+        let actual = disk.device_bytes_per_physical_sector();
+        let expected = phys_size as u64;
+        assert_eq!(actual, expected);
+        assert_ne!(actual, default_phys_size);
+
+        let actual = disk.device_bytes_per_logical_sector();
+        let expected = logi_size as u64;
+        assert_eq!(actual, expected);
+        assert_ne!(actual, default_logi_size);
+
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
+    fn fdisk_can_override_device_grain_size() -> crate::Result<()> {
+        let tmp_image = disk_image_with_pt("gpt");
+        let disk = Fdisk::builder().assign_device(tmp_image.path()).build()?;
+
+        let default_grain_size = disk.device_grain_size();
+
+        let size = 10_485_760; // 10 MiB
+        let disk = Fdisk::builder()
+            .assign_device(tmp_image.path())
+            .device_grain_size(size)
+            .build()?;
+
+        let actual = disk.has_overriden_device_properties();
+        let expected = true;
+        assert_eq!(actual, expected);
+
+        // FIXME the tests below fail with the actual != expected. How does a user
+        // access the overridden values?
+        let actual = disk.device_grain_size();
+        let expected = size;
+        assert_eq!(actual, expected);
+        assert_ne!(actual, default_grain_size);
 
         Ok(())
     }

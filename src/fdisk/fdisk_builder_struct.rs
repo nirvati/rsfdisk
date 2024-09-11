@@ -51,11 +51,43 @@ name of the already existing file system or partition table."))]
     #[builder(
         default,
         setter(
-        transform = |device_file: File, device_path: impl AsRef<Path>| Some((device_file, device_path.as_ref().to_path_buf())),
+        transform = |device_file: File, device_path: impl AsRef<Path>| Some((device_file,
+                device_path.as_ref().to_path_buf())),
         doc = "This method acts like [`FdiskBuilder::assign_device`], but the caller assumes
 responsibility for manually opening/closing the assigned device.  The device **MUST** be
 opened in read/write mode if you set [`FdiskBuilder::enable_read_write`] to `true`."))]
     assign_device_by_file: Option<(File, PathBuf)>,
+
+    #[builder(
+        default,
+        setter(
+        transform = |cylinders: u32, heads: u32, sectors: u32| Some((cylinders, heads, sectors)),
+        doc = "Override the assigned device's number of cylinders, heads, and sectors. Obviously
+this function can not modify the physical properties of a disk, it just sets the internal
+values used when creating a partition table.\n\n
+Note that the maximum number of heads can not exceed `255`, and the number of sectors exceed `63`."))]
+    device_geometry: Option<(u32, u32, u32)>,
+
+    #[builder(
+        default,
+        setter(
+            strip_option,
+            doc = "Override the assigned device's preferred grain size. The
+grain size is used to align partitions, and is by default equal to the optimal I/O size
+or 1 MiB, whichever is the largest. If the value given is too small, [`Fdisk`] will
+use the largest of the device's physical sector size or the minimum I/O
+size."
+        )
+    )]
+    device_grain_size: Option<u64>,
+
+    #[builder(
+        default,
+        setter(
+        transform = |physical_sector_size:u32, logical_sector_size: u32|
+        Some((physical_sector_size, logical_sector_size)),
+        doc = "Override the assigned device's preferred logical and physical sectors sizes (in bytes)."))]
+    device_sector_sizes: Option<(u32, u32)>,
 
     #[builder(
         default,
@@ -121,6 +153,9 @@ impl<
         'a,
         __assign_device: ::typed_builder::Optional<Option<PathBuf>>,
         __assign_device_by_file: ::typed_builder::Optional<Option<(File, PathBuf)>>,
+        __device_geometry: ::typed_builder::Optional<Option<(u32, u32, u32)>>,
+        __device_grain_size: ::typed_builder::Optional<Option<u64>>,
+        __device_sector_sizes: ::typed_builder::Optional<Option<(u32, u32)>>,
         __device_addressing: ::typed_builder::Optional<Option<DeviceAddressing>>,
         __enable_interactive: ::typed_builder::Optional<bool>,
         __display_partition_list_only: ::typed_builder::Optional<bool>,
@@ -133,6 +168,9 @@ impl<
     FdiskBuilder<(
         __assign_device,
         __assign_device_by_file,
+        __device_geometry,
+        __device_grain_size,
+        __device_sector_sizes,
         __device_addressing,
         __enable_interactive,
         __display_partition_list_only,
@@ -150,6 +188,7 @@ impl<
         let builder = self.__make();
 
         let mut context = Fdisk::new()?;
+
         match (
             builder.enable_read_write,
             builder.assign_device,
@@ -186,6 +225,23 @@ impl<
                 return Err(FdiskBuilderError::MutuallyExclusive(err_msg));
             }
         }
+
+        // ----------------------------------------------------------------------------
+        // Override the device's preferred values.
+        // These overrides must be set BEFORE any assign_device_* function is called.
+
+        if let Some((cylinders, heads, sectors)) = builder.device_geometry {
+            context.save_device_geometry_overrides(cylinders, heads, sectors)?;
+        }
+
+        if let Some(grain_size) = builder.device_grain_size {
+            context.save_device_grain_size_override(grain_size)?;
+        }
+
+        if let Some((physical_sector_size, logical_sector_size)) = builder.device_sector_sizes {
+            context.save_device_sector_overrides(physical_sector_size, logical_sector_size)?;
+        }
+        // ----------------------------------------------------------------------------
 
         match builder.device_addressing {
             // Default

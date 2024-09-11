@@ -13,7 +13,6 @@ use std::fmt;
 #[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 #[non_exhaustive]
-#[allow(dead_code)]
 pub(crate) enum LBAAlign {
     Down = libfdisk::FDISK_ALIGN_DOWN,
     Nearest = libfdisk::FDISK_ALIGN_NEAREST,

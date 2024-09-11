@@ -250,19 +250,19 @@
 //!
 //! #### Alignment
 //!
-//! | `libfdisk`                               | `rsfdisk` |
-//! | ------------------                       | --------- |
-//! | [`typedef fdisk_sector_t`][92]           |           |
-//! | [`fdisk_align_lba`][93]                  |           |
-//! | [`fdisk_align_lba_in_range`][94]         |           |
-//! | [`fdisk_has_user_device_properties`][95] |           |
-//! | [`fdisk_lba_is_phy_aligned`][96]         |           |
-//! | [`fdisk_override_geometry`][97]          |           |
-//! | [`fdisk_reset_alignment`][98]            |           |
-//! | [`fdisk_reset_device_properties`][99]    |           |
-//! | [`fdisk_save_user_geometry`][100]        |           |
-//! | [`fdisk_save_user_grain`][101]           |           |
-//! | [`fdisk_save_user_sector_size`][102]     |           |
+//! | `libfdisk`                               | `rsfdisk`                                                                                                                                                                                              |
+//! | ------------------                       | ---------                                                                                                                                                                                              |
+//! | [`typedef fdisk_sector_t`][92]           | [`u64`]                                                                                                                                                                                                |
+//! | [`fdisk_align_lba`][93]                  | [`Fdisk::align_lba_up`](crate::fdisk::Fdisk::align_lba_up) <br> [`Fdisk::align_lba_down`](crate::fdisk::Fdisk::align_lba_down)<br>[`Fdisk::align_lba_nearest`](crate::fdisk::Fdisk::align_lba_nearest) |
+//! | [`fdisk_align_lba_in_range`][94]         | [`Fdisk::align_lba_in_range`](crate::fdisk::Fdisk::align_lba_in_range)                                                                                                                                 |
+//! | [`fdisk_has_user_device_properties`][95] | [`Fdisk::has_overriden_device_properties`](crate::fdisk::Fdisk::has_overriden_device_properties)                                                                                                       |
+//! | [`fdisk_lba_is_phy_aligned`][96]         | [`Fdisk::is_lba_physically_aligned`](crate::fdisk::Fdisk::is_lba_physically_aligned)                                                                                                                   |
+//! | [`fdisk_override_geometry`][97]          | [`Fdisk::override_device_geometry`](crate::fdisk::Fdisk::override_device_geometry)                                                                                                                     |
+//! | [`fdisk_reset_alignment`][98]            | [`Fdisk::restore_default_lba_alignment`](crate::fdisk::Fdisk::restore_default_lba_alignment)                                                                                                           |
+//! | [`fdisk_reset_device_properties`][99]    | [`Fdisk::restore_device_properties`](crate::fdisk::Fdisk::restore_device_properties)                                                                                                                   |
+//! | [`fdisk_save_user_geometry`][100]        | [`FdiskBuilder::device_geometry`](crate::fdisk::FdiskBuilder::device_geometry)                                                                                                                         |
+//! | [`fdisk_save_user_grain`][101]           | [`FdiskBuilder::device_grain_size`](crate::fdisk::FdiskBuilder::device_grain_size)                                                                                                                     |
+//! | [`fdisk_save_user_sector_size`][102]     | [`FdiskBuilder::device_sector_sizes`](crate::fdisk::FdiskBuilder::device_sector_sizes)                                                                                                                 |
 //!
 //! [92]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Alignment.html#fdisk-sector-t
 //! [93]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-Alignment.html#fdisk-align-lba

@@ -88,7 +88,6 @@ pub use fdisk_builder_struct::FdiskBuilder;
 pub use fdisk_error_enum::FdiskError;
 pub use fdisk_struct::Fdisk;
 pub(crate) use gc_item_enum::GcItem;
-#[allow(unused_imports)]
 pub(crate) use lba_align_enum::LBAAlign;
 pub use partition_table_iter_mut_struct::PartitionTableIterMut;
 pub use partition_table_iter_struct::PartitionTableIter;
