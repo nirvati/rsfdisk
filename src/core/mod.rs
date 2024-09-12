@@ -17,3 +17,4 @@ pub mod partition_table;
 pub(crate) mod private;
 pub mod prompt;
 pub mod script;
+pub mod utils;
