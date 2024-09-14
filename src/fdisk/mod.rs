@@ -88,6 +88,7 @@ pub use fdisk_builder_struct::FdiskBuilder;
 pub use fdisk_error_enum::FdiskError;
 pub use fdisk_struct::Fdisk;
 pub(crate) use gc_item_enum::GcItem;
+pub use partition_table_iter_mut_struct::PartitionTableIterMut;
 pub use partition_table_iter_struct::PartitionTableIter;
 pub use size_format_enum::SizeFormat;
 
@@ -97,5 +98,6 @@ mod fdisk_builder_struct;
 mod fdisk_error_enum;
 mod fdisk_struct;
 mod gc_item_enum;
+mod partition_table_iter_mut_struct;
 mod partition_table_iter_struct;
 mod size_format_enum;
