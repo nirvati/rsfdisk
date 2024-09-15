@@ -11,8 +11,11 @@
 
 pub use device_addressing_enum::DeviceAddressing;
 pub use fdisk_error_enum::FdiskError;
+#[allow(unused_imports)]
+pub(crate) use gc_item_enum::GcItem;
 pub use size_format_enum::SizeFormat;
 
 mod device_addressing_enum;
 mod fdisk_error_enum;
+mod gc_item_enum;
 mod size_format_enum;
