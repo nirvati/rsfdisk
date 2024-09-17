@@ -8,6 +8,7 @@
 // From standard library
 
 // From this library
+pub use bit_flag_enum::BitFlag;
 pub use code_enum::Code;
 pub use dos_flag_enum::DOSFlag;
 pub use gpt_flag_enum::GPTFlag;
@@ -23,6 +24,7 @@ pub use partition_list_struct::PartitionList;
 pub use partition_struct::Partition;
 pub use sgi_flag_enum::SGIFlag;
 
+mod bit_flag_enum;
 mod code_enum;
 mod dos_flag_enum;
 mod gpt_flag_enum;
