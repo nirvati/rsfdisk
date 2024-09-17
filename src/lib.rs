@@ -660,13 +660,13 @@
 //! ### Label specific functions
 //! #### DOS
 //!
-//! | `libfdisk`                           | `rsfdisk` |
-//! | ------------------                   | --------- |
-//! | [`DOS_FLAG_ACTIVE`][272]             |           |
-//! | [`fdisk_dos_enable_compatible`][273] |           |
-//! | [`fdisk_dos_is_compatible`][274]     |           |
-//! | [`fdisk_dos_move_begin`][275]        |           |
-//! | [`fdisk_dos_fix_chs`][276]           |           |
+//! | `libfdisk`                           | `rsfdisk`                                                |
+//! | ------------------                   | ---------                                                |
+//! | [`DOS_FLAG_ACTIVE`][272]             | [`DOSFlag::Boot`](crate::core::partition::DOSFlag::Boot) |
+//! | [`fdisk_dos_enable_compatible`][273] |                                                          |
+//! | [`fdisk_dos_is_compatible`][274]     |                                                          |
+//! | [`fdisk_dos_move_begin`][275]        |                                                          |
+//! | [`fdisk_dos_fix_chs`][276]           |                                                          |
 //!
 //! [272]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-DOS.html#DOS-FLAG-ACTIVE:CAPS
 //! [273]: https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/libfdisk-docs/libfdisk-DOS.html#fdisk-dos-enable-compatible
