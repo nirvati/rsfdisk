@@ -37,6 +37,85 @@ install the required dependencies on your system.
 
 [Documentation (docs.rs)][2]
 
+## Example
+
+In this example we create a `GPT` partition table on `/dev/vda`, then divide it
+into three partitions:
+
+- a 16 GiB `root` partition to keep system files,
+- and two 64 GiB data partitions.
+
+```rust
+use rsfdisk::fdisk::Fdisk;
+use rsfdisk::core::partition_table::PartitionTableKind;
+use rsfdisk::core::partition::Guid;
+use rsfdisk::core::partition::Partition;
+use rsfdisk::core::partition::PartitionKind;
+use rsfdisk::core::partition::PartitionList;
+
+fn main() -> rsfdisk::Result<()> {
+    let mut disk = Fdisk::builder()
+        // Operate on `/dev/vda`.
+        .assign_device("/dev/vda")
+        // Allow Fdisk to persist changes to disk.
+        .enable_read_write()
+        // Remove all existing partition tables, file systems, and RAID
+        // signatures on the assigned device before writing a new partition
+        // table.
+        .wipe_device_metadata()
+        .build()?;
+
+    // Create a `GPT` partition table.
+    disk.partition_table_create(PartitionTableKind::GPT)?;
+
+    // Configure a 16 GiB System partition
+    let partition_type = PartitionKind::builder()
+       // Set the partition type identifier for a GUID/GPT partition table.
+       .guid(Guid::LinuxRootx86_64)
+       .build()?;
+
+    let root = Partition::builder()
+       .partition_type(partition_type)
+       .name("System")
+       //Assuming 512 bytes per sector, 33,554,432 sectors <=> 16 GiB.
+       .size_in_sectors(33_554_432)
+       .build()?;
+
+    // Create the root partition.
+    let _ = disk.partition_add(root)?;
+
+    // Configure two 64 GiB data partitions.
+    let mut data_partitions = PartitionList::new()?;
+
+    // Assuming 512 bytes per sector, 68,719,476,736 sectors <=> 64 GiB.
+    let size = 68_719_476_736;
+
+    for i in 0..2 {
+        let partition_type = PartitionKind::builder()
+           .guid(Guid::LinuxData)
+           .build()?;
+
+        let name = format!("Data Part {}", i + 1);
+
+        let partition = Partition::builder()
+           .partition_type(partition_type)
+           .name(name)
+           .size_in_sectors(size)
+           .build()?;
+
+        data_partitions.push(partition)?;
+    }
+
+    // Create the data partitions.
+    disk.partitions_append(data_partitions)?;
+
+    // Write the new partition table on `/dev/vda`.
+    disk.partition_table_write_to_disk()?;
+
+    Ok(())
+}
+```
+
 ## Install required dependencies
 
 ### Alpine Linux
