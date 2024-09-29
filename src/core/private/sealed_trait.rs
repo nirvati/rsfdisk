@@ -7,6 +7,4 @@
 
 // From this library
 
-pub use sealed_trait::Sealed;
-
-mod sealed_trait;
+pub trait Sealed {}
