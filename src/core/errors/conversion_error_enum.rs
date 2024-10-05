@@ -19,4 +19,8 @@ pub enum ConversionError {
     /// Error while converting bytes into a [`Code`](crate::core::partition::Code).
     #[error("{0}")]
     Code(String),
+
+    /// Error while converting a value to a [`MaxColWidth`](crate::core::partition_table::MaxColWidth).
+    #[error("{0}")]
+    MaxColWidth(String),
 }

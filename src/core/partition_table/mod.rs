@@ -10,5 +10,7 @@
 // From this library
 
 pub use field_enum::Field;
+pub use max_col_width_enum::MaxColWidth;
 
 mod field_enum;
+mod max_col_width_enum;
