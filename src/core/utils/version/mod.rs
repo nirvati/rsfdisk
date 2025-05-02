@@ -48,7 +48,10 @@ where
 {
     unsafe {
         let version_string = version_string.as_ref();
-        let version_cstr = ffi_utils::as_ref_str_to_c_string(version_string)?;
+        let version_cstr = ffi_utils::as_ref_str_to_c_string(version_string).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            VersionError::CStringConversion(err_msg)
+        })?;
 
         let version_code = libfdisk::fdisk_parse_version_string(version_cstr.as_ptr());
         log::debug!("version::version_string_to_release_code converted version string {:?} to release code {:?}", version_string, version_code);

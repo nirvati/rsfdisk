@@ -103,7 +103,11 @@ impl<'a> Fdisk<'a> {
         name: &str,
     ) -> Result<Fdisk<'a>, FdiskError> {
         log::debug!("Fdisk::make_new_nested_partitioner creating a new nested `Fdisk` instance");
-        let name_cstr = ffi_utils::as_ref_str_to_c_string(name)?;
+        let name_cstr = ffi_utils::as_ref_str_to_c_string(name).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
+
         let name_ptr = if name.is_empty() {
             std::ptr::null()
         } else {
@@ -178,7 +182,10 @@ impl<'a> Fdisk<'a> {
             device_path
         );
 
-        let dev_path = ffi_utils::as_ref_path_to_c_string(device_path)?;
+        let dev_path = ffi_utils::as_ref_path_to_c_string(device_path).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
 
         let result =
             unsafe { libfdisk::fdisk_assign_device(fdisk.inner, dev_path.as_ptr(), read_only) };
@@ -226,7 +233,10 @@ impl<'a> Fdisk<'a> {
             device_path
         );
 
-        let dev_path = ffi_utils::as_ref_path_to_c_string(device_path)?;
+        let dev_path = ffi_utils::as_ref_path_to_c_string(device_path).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
 
         // Requested a read/write assignment but file open as read-only.
         let is_open_read_only =
@@ -1109,7 +1119,11 @@ impl<'a> Fdisk<'a> {
         let message = message.as_ref();
         log::debug!("Fdisk::log_info printing info message: {:?}", message);
 
-        let msg_cstr = ffi_utils::as_ref_str_to_c_string(message)?;
+        let msg_cstr = ffi_utils::as_ref_str_to_c_string(message).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
+
         let fmt = CString::new("%s").unwrap();
 
         let result = unsafe { libfdisk::fdisk_info(self.inner, fmt.as_ptr(), msg_cstr.as_ptr()) };
@@ -1141,7 +1155,11 @@ impl<'a> Fdisk<'a> {
         let message = message.as_ref();
         log::debug!("Fdisk::log_warn printing warning message: {:?}", message);
 
-        let msg_cstr = ffi_utils::as_ref_str_to_c_string(message)?;
+        let msg_cstr = ffi_utils::as_ref_str_to_c_string(message).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
+
         let fmt = CString::new("%s").unwrap();
 
         let result = unsafe { libfdisk::fdisk_warnx(self.inner, fmt.as_ptr(), msg_cstr.as_ptr()) };
@@ -1177,7 +1195,11 @@ impl<'a> Fdisk<'a> {
             errno
         );
 
-        let msg_cstr = ffi_utils::as_ref_str_to_c_string(message)?;
+        let msg_cstr = ffi_utils::as_ref_str_to_c_string(message).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
+
         let fmt = CString::new("%s").unwrap();
 
         let result =
@@ -1525,7 +1547,10 @@ impl<'a> Fdisk<'a> {
             "Fdisk::partition_table_create creating {:?} partition table",
             kind
         );
-        let kind_cstr = ffi_utils::as_ref_str_to_c_string(kind.to_string())?;
+        let kind_cstr = ffi_utils::as_ref_str_to_c_string(kind.to_string()).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
 
         Self::create_partition_table(self.inner, kind_cstr.as_ptr())
     }
@@ -1608,7 +1633,11 @@ impl<'a> Fdisk<'a> {
         T: AsRef<str>,
     {
         let id = id.as_ref();
-        let id_cstr = ffi_utils::as_ref_str_to_c_string(id)?;
+        let id_cstr = ffi_utils::as_ref_str_to_c_string(id).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
+
         log::debug!(
             "Fdisk::partition_table_set_string_id setting partition table's ID: {:?}",
             id
@@ -1798,7 +1827,11 @@ impl<'a> Fdisk<'a> {
         T: AsRef<Path>,
     {
         let file_path = file_path.as_ref();
-        let path = ffi_utils::as_ref_path_to_c_string(file_path)?;
+        let path = ffi_utils::as_ref_path_to_c_string(file_path).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
+
         log::debug!(
             "Fdisk::script_new_from_file creating a new `Script` instance from: {:?}",
             file_path
@@ -2253,7 +2286,11 @@ impl<'a> Fdisk<'a> {
         T: AsRef<str>,
     {
         let question = question.as_ref();
-        let question_cstr = ffi_utils::as_ref_str_to_c_string(question)?;
+        let question_cstr = ffi_utils::as_ref_str_to_c_string(question).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
+
         log::debug!(
             "Fdisk::ask_yes_no_question asking yes/no question: {:?}",
             question
@@ -2365,7 +2402,10 @@ impl<'a> Fdisk<'a> {
             default_value
         );
         let question = question.as_ref();
-        let question_cstr = ffi_utils::as_ref_str_to_c_string(question)?;
+        let question_cstr = ffi_utils::as_ref_str_to_c_string(question).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
 
         let mut ptr = MaybeUninit::<libfdisk::uintmax_t>::zeroed();
 
@@ -2410,7 +2450,10 @@ impl<'a> Fdisk<'a> {
     {
         log::debug!("Fdisk::ask_string_value requesting string value");
         let question = question.as_ref();
-        let question_cstr = ffi_utils::as_ref_str_to_c_string(question)?;
+        let question_cstr = ffi_utils::as_ref_str_to_c_string(question).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            FdiskError::CStringConversion(err_msg)
+        })?;
 
         let mut ptr = MaybeUninit::<*mut libc::c_char>::zeroed();
 

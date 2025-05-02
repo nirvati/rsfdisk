@@ -5,12 +5,11 @@
 use thiserror::Error;
 
 // From standard library
-use std::ffi::NulError;
 
 // From this library
 
 /// [`PartitionTable`](crate::core::partition_table::PartitionTable) runtime errors.
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[non_exhaustive]
 pub enum PartitionTableError {
     /// Error while configuring a new [`PartitionTable`](crate::core::partition_table::PartitionTable) instance.
@@ -22,8 +21,8 @@ pub enum PartitionTableError {
     Conversion(String),
 
     /// Error while converting a value to [`CString`](std::ffi::CString).
-    #[error("failed to convert value to `CString`: {0}")]
-    CStringConversion(#[from] NulError),
+    #[error("{0}")]
+    CStringConversion(String),
 
     /// Error while parsing a string into a type.
     #[error("{0}")]

@@ -5,12 +5,11 @@
 use thiserror::Error;
 
 // From standard library
-use std::ffi::NulError;
 
 // From this library
 
 /// [`Fdisk`](crate::fdisk::Fdisk) runtime errors.
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[non_exhaustive]
 pub enum FdiskError {
     /// Error while assigning a device to a [`Fdisk`](crate::fdisk::Fdisk) instance.
@@ -38,8 +37,8 @@ pub enum FdiskError {
     DialogsDisabled(String),
 
     /// Error while converting a value to [`CString`](std::ffi::CString).
-    #[error("failed to convert value to `CString`: {}", .0)]
-    CStringConversion(#[from] NulError),
+    #[error("{0}")]
+    CStringConversion(String),
 
     /// Error while aligning data to block sector boundaries on disk.
     #[error("{0}")]

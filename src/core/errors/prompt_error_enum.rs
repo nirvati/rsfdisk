@@ -5,12 +5,11 @@
 use thiserror::Error;
 
 // From standard library
-use std::ffi::NulError;
 
 // From this library
 
 /// [`Prompt`](crate::core::prompt::Prompt) runtime errors.
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[non_exhaustive]
 pub enum PromptError {
     /// Error while allocating memory.
@@ -22,8 +21,8 @@ pub enum PromptError {
     Config(String),
 
     /// Error while converting a value to [`CString`](std::ffi::CString).
-    #[error("failed to convert value to `CString`: {}", .0)]
-    CStringConversion(#[from] NulError),
+    #[error("{0}")]
+    CStringConversion(String),
 
     /// Error while selecting a [`MenuItem`](crate::core::prompt::MenuItem).
     #[error("{0}")]

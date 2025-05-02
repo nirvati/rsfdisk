@@ -419,7 +419,11 @@ impl PartitionTable {
         T: AsRef<str>,
     {
         let id = id.as_ref();
-        let id_cstr = ffi_utils::as_ref_str_to_c_string(id)?;
+        let id_cstr = ffi_utils::as_ref_str_to_c_string(id).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            PartitionTableError::CStringConversion(err_msg)
+        })?;
+
         log::debug!(
             "PartitionTable::partition_type_from_string_id parsing: {:?} into a `PartitionKind`",
             id
@@ -481,7 +485,11 @@ impl PartitionTable {
         let string = string.as_ref();
         let flags = flags.as_ref();
 
-        let string_cstr = ffi_utils::as_ref_str_to_c_string(string)?;
+        let string_cstr = ffi_utils::as_ref_str_to_c_string(string).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            PartitionTableError::CStringConversion(err_msg)
+        })?;
+
         let c_flags = flags.iter().fold(0, |acc, &flag| acc | flag as u32);
 
         log::debug!("PartitionTable::partition_type_parse parsing: {:?} with flags: {:?} into a `PartitionKind`", string, flags);
@@ -556,7 +564,11 @@ impl PartitionTable {
         T: AsRef<str>,
     {
         let string = string.as_ref();
-        let string_cstr = ffi_utils::as_ref_str_to_c_string(string)?;
+        let string_cstr = ffi_utils::as_ref_str_to_c_string(string).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            PartitionTableError::CStringConversion(err_msg)
+        })?;
+
         log::debug!(
             "PartitionTable::partition_type_from_code converting string: {:?} to partition type",
             string

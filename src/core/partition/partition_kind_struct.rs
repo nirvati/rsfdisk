@@ -100,7 +100,10 @@ impl PartitionKind {
     {
         log::debug!("PartitionKind::new_unkown creating a new `PartitionKind` instance");
         let kind = kind.as_ref();
-        let kind_cstr = ffi_utils::as_ref_str_to_c_string(kind)?;
+        let kind_cstr = ffi_utils::as_ref_str_to_c_string(kind).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            PartitionKindError::CStringConversion(err_msg)
+        })?;
 
         let mut ptr = MaybeUninit::<*mut libfdisk::fdisk_parttype>::zeroed();
         unsafe {
@@ -192,7 +195,11 @@ impl PartitionKind {
         T: AsRef<str>,
     {
         let name = name.as_ref();
-        let name_cstr = ffi_utils::as_ref_str_to_c_string(name)?;
+        let name_cstr = ffi_utils::as_ref_str_to_c_string(name).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            PartitionKindError::CStringConversion(err_msg)
+        })?;
+
         log::debug!(
             "PartitionKind::set_name setting partition type's name to: {:?}",
             name

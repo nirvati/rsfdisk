@@ -523,9 +523,16 @@ impl<'fdisk> Script<'fdisk> {
         T: AsRef<str>,
     {
         let name = name.as_ref();
-        let name_cstr = ffi_utils::as_ref_str_to_c_string(name)?;
+        let name_cstr = ffi_utils::as_ref_str_to_c_string(name).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            ScriptError::CStringConversion(err_msg)
+        })?;
+
         let value = value.as_ref();
-        let value_cstr = ffi_utils::as_ref_str_to_c_string(value)?;
+        let value_cstr = ffi_utils::as_ref_str_to_c_string(value).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            ScriptError::CStringConversion(err_msg)
+        })?;
 
         log::debug!(
             "Script::add_header adding header named: {:?} with value: {:?}",
@@ -542,7 +549,10 @@ impl<'fdisk> Script<'fdisk> {
         T: AsRef<str>,
     {
         let name = name.as_ref();
-        let name_cstr = ffi_utils::as_ref_str_to_c_string(name)?;
+        let name_cstr = ffi_utils::as_ref_str_to_c_string(name).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            ScriptError::CStringConversion(err_msg)
+        })?;
 
         log::debug!("Script::add_header removing header named: {:?}", name,);
 

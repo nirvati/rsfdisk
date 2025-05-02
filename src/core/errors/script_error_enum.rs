@@ -5,12 +5,11 @@
 use thiserror::Error;
 
 // From standard library
-use std::ffi::NulError;
 
 // From this library
 
 /// [`Script`](crate::core::script::Script) runtime errors.
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[non_exhaustive]
 pub enum ScriptError {
     /// Error while configuring a [`Script`](crate::core::script::Script).
@@ -22,8 +21,8 @@ pub enum ScriptError {
     Compose(String),
 
     /// Error while converting a value to [`CString`](std::ffi::CString).
-    #[error("failed to convert value to `CString`: {}", .0)]
-    CStringConversion(#[from] NulError),
+    #[error("{0}")]
+    CStringConversion(String),
 
     /// Error while reading a [`Script`](crate::core::script::Script) from a file.
     #[error("{0}")]

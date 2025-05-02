@@ -395,7 +395,10 @@ impl Prompt {
             value
         );
 
-        let value_cstr = ffi_utils::as_ref_str_to_c_string(value)?;
+        let value_cstr = ffi_utils::as_ref_str_to_c_string(value).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            PromptError::CStringConversion(err_msg)
+        })?;
 
         // Create a C-allocated copy to be managed by libfdisk.
         let mut copy = MaybeUninit::<*mut libc::c_char>::zeroed();

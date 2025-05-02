@@ -49,7 +49,7 @@ pub type Result<T> = std::result::Result<T, RsFdiskError>;
 ///     Ok(())
 /// }
 /// ```
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[non_exhaustive]
 pub enum RsFdiskError {
     #[error(transparent)]

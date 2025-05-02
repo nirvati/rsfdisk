@@ -254,7 +254,11 @@ impl Partition {
     /// Sets this `Partition`'s name.
     pub(crate) fn set_name(&mut self, name: String) -> Result<(), PartitionError> {
         log::debug!("Partition::set_name setting partition name to: {:?}", name);
-        let name_cstr = ffi_utils::as_ref_str_to_c_string(&name)?;
+
+        let name_cstr = ffi_utils::as_ref_str_to_c_string(&name).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            PartitionError::CStringConversion(err_msg)
+        })?;
 
         let result = unsafe { libfdisk::fdisk_partition_set_name(self.inner, name_cstr.as_ptr()) };
 
@@ -276,7 +280,11 @@ impl Partition {
     #[doc(hidden)]
     /// Sets this `Partition`'s UUID.
     pub(crate) fn set_uuid(&mut self, uuid: String) -> Result<(), PartitionError> {
-        let uuid_cstr = ffi_utils::as_ref_str_to_c_string(&uuid)?;
+        let uuid_cstr = ffi_utils::as_ref_str_to_c_string(&uuid).map_err(|e| {
+            let err_msg = format!("failed to convert value to `CString` {e}");
+            PartitionError::CStringConversion(err_msg)
+        })?;
+
         log::debug!("Partition::set_uuid setting partition UUID to: {:?}", uuid);
 
         let result = unsafe { libfdisk::fdisk_partition_set_uuid(self.inner, uuid_cstr.as_ptr()) };
