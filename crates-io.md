@@ -23,7 +23,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rsfdisk = "0.1.0"
+rsfdisk = "0.2.0"
 ```
 
 Then install the system packages below before running `cargo build`:
