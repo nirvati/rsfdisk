@@ -10,7 +10,7 @@ use thiserror::Error;
 use crate::fdisk::FdiskError;
 
 /// [`FdiskBuilder`](crate::fdisk::FdiskBuilder) runtime errors.
-#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
 pub enum FdiskBuilderError {
     /// Error while configuring `Fdisk` instance.

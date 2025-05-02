@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// [`Prompt`](crate::core::prompt::Prompt) runtime errors.
-#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
 pub enum PromptError {
     /// Error while allocating memory.

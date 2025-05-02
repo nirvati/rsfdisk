@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// [`Fdisk`](crate::fdisk::Fdisk) runtime errors.
-#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
 pub enum FdiskError {
     /// Error while assigning a device to a [`Fdisk`](crate::fdisk::Fdisk) instance.

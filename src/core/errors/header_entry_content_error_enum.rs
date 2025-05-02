@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// [`HeaderEntryContent`](crate::core::partition_table::HeaderEntryContent) runtime errors.
-#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
 pub enum HeaderEntryContentError {
     /// Error while creating a new [`HeaderEntryContent`](crate::core::partition_table::HeaderEntryContent) instance.

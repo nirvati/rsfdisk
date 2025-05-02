@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// [`Script`](crate::core::script::Script) runtime errors.
-#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
 pub enum ScriptError {
     /// Error while configuring a [`Script`](crate::core::script::Script).

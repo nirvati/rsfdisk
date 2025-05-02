@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// `version` module runtime errors.
-#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Error, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
 pub enum VersionError {
     /// Error while converting a value to [`CString`](std::ffi::CString).
