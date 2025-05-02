@@ -32,7 +32,7 @@ pub static VERSION_NUMBER_PATCH: u32 = libfdisk::LIBFDISK_PATCH_VERSION as u32;
 /// # Examples
 ///
 /// ```
-/// use rsfdisk::core::utils::version;
+/// use rsfdisk::utils::version;
 ///
 /// fn main() -> rsfdisk::Result<()> {
 ///

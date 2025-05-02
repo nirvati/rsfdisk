@@ -26,9 +26,9 @@ use crate::ffi_utils;
 ///
 /// ```
 /// # use pretty_assertions::assert_eq;
-/// use rsfdisk::core::partition::Partition;
-/// use rsfdisk::core::partition::PartitionKind;
-/// use rsfdisk::core::partition::Guid;
+/// use rsfdisk::partition::Partition;
+/// use rsfdisk::partition::PartitionKind;
+/// use rsfdisk::partition::Guid;
 ///
 /// fn main() -> rsfdisk::Result<()> {
 ///     // Default partition
@@ -57,9 +57,9 @@ use crate::ffi_utils;
 ///
 /// ```
 /// # use pretty_assertions::assert_eq;
-/// use rsfdisk::core::partition::Partition;
-/// use rsfdisk::core::partition::PartitionKind;
-/// use rsfdisk::core::partition::Guid;
+/// use rsfdisk::partition::Partition;
+/// use rsfdisk::partition::PartitionKind;
+/// use rsfdisk::partition::Guid;
 ///
 /// fn main() -> rsfdisk::Result<()> {
 ///     // Linux Data partition

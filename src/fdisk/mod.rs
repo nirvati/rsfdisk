@@ -74,7 +74,7 @@
 //!
 //! ```ignore
 //! use terminal_size::{terminal_size, Width};
-//! use rsfdisk::core::partition_table::MaxColWidth;
+//! use rsfdisk::partition_table::MaxColWidth;
 //! use rsfdisk::fdisk::Fdisk;
 //! use rsfdisk::fdisk::SizeFormat;
 //!
@@ -157,11 +157,11 @@
 //!
 //! ```ignore
 //! use rsfdisk::fdisk::Fdisk;
-//! use rsfdisk::core::partition_table::PartitionTableKind;
-//! use rsfdisk::core::partition::Guid;
-//! use rsfdisk::core::partition::Partition;
-//! use rsfdisk::core::partition::PartitionKind;
-//! use rsfdisk::core::partition::PartitionList;
+//! use rsfdisk::partition_table::PartitionTableKind;
+//! use rsfdisk::partition::Guid;
+//! use rsfdisk::partition::Partition;
+//! use rsfdisk::partition::PartitionKind;
+//! use rsfdisk::partition::PartitionList;
 //!
 //! fn main() -> rsfdisk::Result<()> {
 //!     let mut disk = Fdisk::builder()

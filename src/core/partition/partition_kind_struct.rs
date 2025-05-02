@@ -233,9 +233,9 @@ impl PartitionKind {
     /// # Examples
     ///
     /// ```
-    /// use rsfdisk::core::partition::PartitionKind;
-    /// use rsfdisk::core::partition::Code;
-    /// use rsfdisk::core::partition::Guid;
+    /// use rsfdisk::partition::PartitionKind;
+    /// use rsfdisk::partition::Code;
+    /// use rsfdisk::partition::Guid;
     ///
     /// fn main() -> rsfdisk::Result<()> {
     ///     // MBR partition type

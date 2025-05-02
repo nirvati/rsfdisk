@@ -13,11 +13,11 @@
 //!
 //! ```ignore
 //! use rsfdisk::fdisk::Fdisk;
-//! use rsfdisk::core::partition_table::PartitionTableKind;
-//! use rsfdisk::core::partition::Code;
-//! use rsfdisk::core::partition::DOSFlag;
-//! use rsfdisk::core::partition::Partition;
-//! use rsfdisk::core::partition::PartitionKind;
+//! use rsfdisk::partition_table::PartitionTableKind;
+//! use rsfdisk::partition::Code;
+//! use rsfdisk::partition::DOSFlag;
+//! use rsfdisk::partition::Partition;
+//! use rsfdisk::partition::PartitionKind;
 //!
 //! fn main() -> rsfdisk::Result<()> {
 //!     // Creating a 16GiB Linux partition on /dev/vda
@@ -62,10 +62,11 @@
 //! ```
 //! ## API structure
 //!
-//! `rsfdisk`'s API is roughly divided into two parts:
+//! `rsfdisk`'s API is roughly divided into the following major modules:
 //! - [`fdisk`]: the main library module holding the [`Fdisk`](crate::fdisk::Fdisk) struct to create/edit/modify partition
 //!   tables,
-//! - [`core`]: the module holding specialised objects used and/or returned by [`Fdisk`](crate::fdisk::Fdisk).
+//! - [`partition_table`]: for working with partition tables.
+//! - [`partition`]: for working with partitions in a partition table.
 //!
 //! Finally, look to the [`debug`] module if you need diagnostics during development.
 //!
@@ -818,7 +819,15 @@
 
 pub use error::*;
 
-pub mod core;
+pub use core::errors;
+pub use core::iter;
+pub use core::partition;
+pub use core::partition_table;
+pub use core::prompt;
+pub use core::script;
+pub use core::utils;
+
+mod core;
 pub mod debug;
 mod error;
 pub mod fdisk;

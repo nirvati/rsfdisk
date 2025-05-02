@@ -25,8 +25,8 @@ use crate::owning_ref_from_ptr;
 ///
 /// ```
 /// # use pretty_assertions::assert_eq;
-/// use rsfdisk::core::partition::Partition;
-/// use rsfdisk::core::partition::PartitionList;
+/// use rsfdisk::partition::Partition;
+/// use rsfdisk::partition::PartitionList;
 ///
 /// fn main() -> rsfdisk::Result<()> {
 ///     let partition1 = Partition::builder()
