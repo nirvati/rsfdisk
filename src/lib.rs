@@ -92,7 +92,7 @@
 //!
 //! `rsfdisk`'s API is roughly divided into two parts:
 //! - [`fdisk`]: the main library module holding the [`Fdisk`](crate::fdisk::Fdisk) struct to create/edit/modify partition
-//! tables,
+//!   tables,
 //! - [`core`]: the module holding specialised objects used and/or returned by [`Fdisk`](crate::fdisk::Fdisk).
 //!
 //! Finally, look to the [`debug`] module if you need diagnostics during development.

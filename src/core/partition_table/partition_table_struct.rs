@@ -399,9 +399,9 @@ impl PartitionTable {
     /// Each partition table type supports specific kinds of partitions. These partition types have
     /// various identification schemes, for example the type of a partition in:
     /// - an `MBR` partition table is referred to by a numerical code in hexadecimal (i.e. `0x83`
-    /// for a Linux native partition, `0x39` for a Plan 9 edition 3 partition, etc.),
+    ///   for a Linux native partition, `0x39` for a Plan 9 edition 3 partition, etc.),
     /// - a `GPT` partition table is characterized by a partition UUID (i.e.
-    /// `83bd6b9d-7f41-11dc-be0b-001560b84f0f` for a FreeBSD boot partition)
+    ///   `83bd6b9d-7f41-11dc-be0b-001560b84f0f` for a FreeBSD boot partition)
     ///
     /// Given a string identifier, this function will try to parse it into the corresponding
     /// [`PartitionKind`] supported by this `PartitionTable`. If the identifier is unknown, this

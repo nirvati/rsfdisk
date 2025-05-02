@@ -72,7 +72,7 @@ pub enum HeaderEntry {
     /// The starting LBA of the GUID Partition Entry array.
     GptPartitionEntryFirstLba = libfdisk::fdisk_labelitem_gpt_GPT_LABELITEM_ENTRIESLBA + GPT_OFFSET,
 
-    #[cfg(v2_39)]
+    #[cfg(fdisk = "v2_39")]
     /// The ending LBA of the GUID Partition Entry array.
     GptPartitionEntryLastLba =
         libfdisk::fdisk_labelitem_gpt_GPT_LABELITEM_ENTRIESLASTLBA + GPT_OFFSET,
@@ -126,7 +126,7 @@ impl HeaderEntry {
             | Self::GptFirstUsableLba
             | Self::GptDiskGuid
             | Self::GptLastUsableLba => GPT_OFFSET,
-            #[cfg(v2_39)]
+            #[cfg(fdisk = "v2_39")]
             Self::GptPartitionEntryLastLba => GPT_OFFSET,
             Self::SgiBootfile
             | Self::SgiInterleave

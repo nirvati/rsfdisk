@@ -67,6 +67,7 @@ impl<'fdisk> Script<'fdisk> {
     }
 
     #[doc(hidden)]
+    #[allow(dead_code)]
     /// Creates a new `Script` instance.
     pub(crate) fn new(_: &'fdisk Fdisk, inner: *mut libfdisk::fdisk_script) -> Script<'fdisk> {
         log::debug!("Script::new creating a new `Script` instance");

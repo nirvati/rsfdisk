@@ -14,7 +14,7 @@ use crate::fdisk::FdiskError;
 ///
 /// This trait is sealed and can not be implemented for types outside of `rsfdisk`.
 pub trait FdiskDOSExt: Sealed {
-    #[cfg(v2_39)]
+    #[cfg(fdisk = "v2_39")]
     /// Fixes the starting and ending LBA values for every partition according to their relative
     /// offset, size, and disk geometry (sectors per track and number of heads), then returns the
     /// number of modified partitions.
@@ -25,7 +25,7 @@ pub trait FdiskDOSExt: Sealed {
 }
 
 impl<'a> FdiskDOSExt for Fdisk<'a> {
-    #[cfg(v2_39)]
+    #[cfg(fdisk = "v2_39")]
     fn dos_fix_chs_values(&mut self) -> usize {
         let modifications = unsafe { libfdisk::fdisk_dos_fix_chs(self.inner) as usize };
         log::debug!("Fdisk::dos_fix_chs_values fixing DOS Cylinder/Head/Sector values, modified {:?} values", modifications);

@@ -17,7 +17,7 @@
 /// - a Protective MBR,
 /// - a Partition Table Header,
 /// - and a Partition Entry Array,
-/// as illustrated on the diagram below.
+///   as illustrated on the diagram below.
 ///
 /// ![Diagram illustrating the layout of the GUID Partition Table (GPT) scheme. Each logical
 /// block (LBA) is 512 bytes in size. LBA addresses that are negative indicate position from

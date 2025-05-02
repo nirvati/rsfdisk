@@ -1242,13 +1242,13 @@ impl<'a> Fdisk<'a> {
     /// outlined below:
     ///
     /// - if the starting sector of `partition` is within the range reserved for the extended
-    /// partition, this method will add a logical partition to the `MBR`,
+    ///   partition, this method will add a logical partition to the `MBR`,
     /// - if the starting sector of `partition` is outside the range reserved for the extended
-    /// partition, this method will add a primary partition to the `MBR`,
+    ///   partition, this method will add a primary partition to the `MBR`,
     /// - if `partition` has a partition number < 4, this method will add a primary partition to
-    /// the `MBR`,
+    ///   the `MBR`,
     /// - if `partition` has a partition number >= 4, this method will add a logical partition to
-    /// the `MBR`.
+    ///   the `MBR`.
     ///
     /// If the template lacks essential information necessary to complete the process, it will
     /// revert to interactively asking for the missing data.
@@ -2832,11 +2832,11 @@ impl<'a> Fdisk<'a> {
     ///
     /// **Note:**
     /// - `nth=3`, and `nth=4` allow access to respectively, the backup Partition Entry Array, and
-    /// the backup Partition Table Header (i.e. the secondary GPT in the diagram above).
+    ///   the backup Partition Table Header (i.e. the secondary GPT in the diagram above).
     /// - the values returned by this method are from a copy of the assigned device's partition
-    /// table kept in memory; which might differ from the one on disk.<br>
-    /// To have the most up-to-date values, it is recommended to invoke this method after
-    /// synchronising states by calling [`Fdisk::partition_table_write_to_disk`].
+    ///   table kept in memory; which might differ from the one on disk.<br>
+    ///   To have the most up-to-date values, it is recommended to invoke this method after
+    ///   synchronising states by calling [`Fdisk::partition_table_write_to_disk`].
     pub fn partition_table_section(&self, nth: i32) -> Option<TableSection> {
         log::debug!(
             "Fdisk::partition_table_section locating partition table section: {:?}",
