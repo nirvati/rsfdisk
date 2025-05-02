@@ -10,7 +10,7 @@ use std::ffi::NulError;
 // From this library
 
 /// `version` module runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum VersionError {
     /// Error while converting a value to [`CString`](std::ffi::CString).

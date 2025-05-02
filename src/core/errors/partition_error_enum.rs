@@ -11,7 +11,7 @@ use std::ffi::NulError;
 use crate::core::errors::PartitionKindError;
 
 /// [`Partition`](crate::core::partition::Partition) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum PartitionError {
     /// Error while creating a new [`Partition`](crate::core::partition::Partition) instance.

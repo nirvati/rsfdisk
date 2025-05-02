@@ -10,7 +10,7 @@ use std::ffi::NulError;
 // From this library
 
 /// [`Script`](crate::core::script::Script) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum ScriptError {
     /// Error while configuring a [`Script`](crate::core::script::Script).
@@ -30,8 +30,8 @@ pub enum ScriptError {
     Read(String),
 
     /// Input/Output runtime error.
-    #[error(transparent)]
-    IoError(#[from] std::io::Error),
+    #[error("{0}")]
+    IoError(String),
 
     /// Error while overriding a value in a [`Script`](crate::core::script::Script).
     #[error("{0}")]

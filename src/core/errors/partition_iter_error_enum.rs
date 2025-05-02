@@ -10,7 +10,7 @@ use thiserror::Error;
 use crate::core::errors::GenIteratorError;
 
 /// [`PartitionIter`](crate::core::partition::PartitionIter) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum PartitionIterError {
     #[error(transparent)]

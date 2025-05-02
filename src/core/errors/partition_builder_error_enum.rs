@@ -10,7 +10,7 @@ use thiserror::Error;
 use crate::core::errors::PartitionError;
 
 /// [`PartitionBuilder`](crate::core::partition::PartitionBuilder) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum PartitionBuilderError {
     /// Error while configuring [`Partition`](crate::core::partition::Partition) instance.

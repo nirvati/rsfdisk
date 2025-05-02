@@ -229,7 +229,9 @@ impl<'a> Fdisk<'a> {
         let dev_path = ffi_utils::as_ref_path_to_c_string(device_path)?;
 
         // Requested a read/write assignment but file open as read-only.
-        if read_only == 0 && ffi_utils::is_open_read_only(&file)? {
+        let is_open_read_only =
+            ffi_utils::is_open_read_only(&file).map_err(|e| FdiskError::IoError(e.to_string()))?;
+        if read_only == 0 && is_open_read_only {
             let err_msg = format!(
                 "failed to assign {} device: {:?}. Device NOT open in read/write mode",
                 mode, device_path

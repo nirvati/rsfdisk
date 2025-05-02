@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// [`GenIterator`](crate::core::iter::GenIterator) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum GenIteratorError {
     /// Error while creating a new [`GenIterator`](crate::core::iter::GenIterator) instance.

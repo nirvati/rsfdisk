@@ -10,7 +10,7 @@ use std::ffi::NulError;
 // From this library
 
 /// [`Prompt`](crate::core::prompt::Prompt) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum PromptError {
     /// Error while allocating memory.

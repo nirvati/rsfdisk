@@ -10,7 +10,7 @@ use std::ffi::NulError;
 // From this library
 
 /// [`PartitionTable`](crate::core::partition_table::PartitionTable) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum PartitionTableError {
     /// Error while configuring a new [`PartitionTable`](crate::core::partition_table::PartitionTable) instance.

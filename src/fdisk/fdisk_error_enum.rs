@@ -10,7 +10,7 @@ use std::ffi::NulError;
 // From this library
 
 /// [`Fdisk`](crate::fdisk::Fdisk) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum FdiskError {
     /// Error while assigning a device to a [`Fdisk`](crate::fdisk::Fdisk) instance.
@@ -46,8 +46,8 @@ pub enum FdiskError {
     DataAlignment(String),
 
     /// Input/Output runtime errors.
-    #[error(transparent)]
-    IoError(#[from] std::io::Error),
+    #[error("{0}")]
+    IoError(String),
 
     /// Error while printing log messages.
     #[error("{0}")]

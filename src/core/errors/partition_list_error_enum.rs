@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// [`PartitionList`](crate::core::partition::PartitionList) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum PartitionListError {
     /// Error while removing all partitions in a [`PartitionList`](crate::core::partition::PartitionList).

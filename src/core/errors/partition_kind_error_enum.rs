@@ -10,7 +10,7 @@ use std::ffi::NulError;
 // From this library
 
 /// [`PartitionKind`](crate::core::partition::PartitionKind) runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum PartitionKindError {
     /// Error while copying a [`PartitionKind`](crate::core::partition::PartitionKind).

@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// String parser runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum ParserError {
     /// Error while parsing a string into a [`Guid`](crate::core::partition::Guid).

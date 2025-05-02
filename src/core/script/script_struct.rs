@@ -81,7 +81,10 @@ impl<'fdisk> Script<'fdisk> {
     #[doc(hidden)]
     /// Reads and parses a script file's content.
     fn read_file(ptr: &mut Self, file: &mut File) -> Result<(), ScriptError> {
-        let file_stream = ffi_utils::read_only_c_file_stream_from(file)?;
+        let file_stream = ffi_utils::read_only_c_file_stream_from(file).map_err(|e| {
+            let err_msg = format!("failed to read script file {e}");
+            ScriptError::IoError(err_msg)
+        })?;
 
         // Rust complains with note: expected raw pointer `*mut _IO_FILE` found raw pointer `*mut FILE`
         // however from glibc/libio/bits/types/FILE.h we have the following definition
@@ -112,7 +115,10 @@ impl<'fdisk> Script<'fdisk> {
         let file_path = file_path.as_ref();
         log::debug!("Script::import_file importing file: {:?}", file_path);
 
-        let mut file = OpenOptions::new().read(true).open(file_path)?;
+        let mut file = OpenOptions::new().read(true).open(file_path).map_err(|e| {
+            let err_msg = format!("failed to open file {} {e}", file_path.display());
+            ScriptError::IoError(err_msg)
+        })?;
 
         Self::read_file(self, &mut file)
     }
@@ -252,7 +258,10 @@ impl<'fdisk> Script<'fdisk> {
     ) -> Result<(), ScriptError> {
         log::debug!("Script::read_line reading a line from file");
 
-        let file_stream = ffi_utils::read_only_c_file_stream_from(file)?;
+        let file_stream = ffi_utils::read_only_c_file_stream_from(file).map_err(|e| {
+            let err_msg = format!("failed to read file stream {e}");
+            ScriptError::IoError(err_msg)
+        })?;
 
         let result = unsafe {
             libfdisk::fdisk_script_read_line(
@@ -391,7 +400,10 @@ impl<'fdisk> Script<'fdisk> {
     #[doc(hidden)]
     /// Writes a script's content to file.
     fn write_file(ptr: &mut Self, file: &mut File) -> Result<(), ScriptError> {
-        let file_stream = ffi_utils::write_only_c_file_stream_from(file)?;
+        let file_stream = ffi_utils::write_only_c_file_stream_from(file).map_err(|e| {
+            let err_msg = format!("failed to write file stream {e}");
+            ScriptError::IoError(err_msg)
+        })?;
 
         let result = unsafe { libfdisk::fdisk_script_write_file(ptr.inner, file_stream as *mut _) };
 
@@ -418,7 +430,14 @@ impl<'fdisk> Script<'fdisk> {
         let file_path = file_path.as_ref();
         log::debug!("Script::export_to_file exporting to file: {:?}", file_path);
 
-        let mut file = OpenOptions::new().read(true).write(true).open(file_path)?;
+        let mut file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(file_path)
+            .map_err(|e| {
+                let err_msg = format!("failed to open file {} {e}", file_path.display());
+                ScriptError::IoError(err_msg)
+            })?;
 
         Self::write_file(self, &mut file)
     }

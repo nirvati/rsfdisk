@@ -9,7 +9,7 @@ use thiserror::Error;
 // From this library
 
 /// Type conversion runtime errors.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 #[non_exhaustive]
 pub enum ConversionError {
     /// Error while converting bytes into a [`Guid`](crate::core::partition::Guid).
