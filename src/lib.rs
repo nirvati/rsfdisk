@@ -1,34 +1,6 @@
 // Copyright (c) 2023 Nick Piaddo
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! # Table of Contents
-//! 1. [Description](#description)
-//! 2. [API structure](#api-structure)
-//! 3. [From `libfdisk` to `rsfdisk`](#from-libfdisk-to-rsfdisk)
-//!     1. [Basic handlers and setting](#basic-handlers-and-setting)
-//!         1. [Context](#context)
-//!         2. [Ask](#ask)
-//!         3. [Alignment](#alignment)
-//!         4. [Script](#script)
-//!     2. [Partitioning](#partitioning)
-//!         1. [Label](#label)
-//!         2. [Partition](#partition)
-//!         3. [Table](#table)
-//!         4. [Partition types](#partition-types)
-//!         5. [Label item](#label-item)
-//!         6. [Field](#field)
-//!     3. [Label specific functions](#label-specific-functions)
-//!         1. [Dos](#dos)
-//!         2. [UEFI GPT](#uefi-gpt)
-//!         3. [SUN](#sun)
-//!         4. [SGI](#sgi)
-//!         5. [BSD](#bsd)
-//!     4. [Misc](#misc)
-//!         1. [Iterator](#iterator)
-//!         2. [Utils](#utils)
-//!         3. [Library Initialization](#library-initialization)
-//!         4. [Version functions](#version-functions)
-//!
 //! ## Description
 //!
 //! The `rsfdisk` library is a safe Rust wrapper around `util-linux/libfdisk`.

@@ -3,16 +3,6 @@
 
 //! `rsfdisk`'s main module.
 //!
-//! ----
-//! # Table of Contents
-//! 1. [Description](#description)
-//! 2. [Overview](#overview)
-//! 3. [Usage](#usage)
-//! 4. [Examples](#examples)
-//!     1. [Read device topology](#read-device-topology)
-//!     2. [List device partitions](#list-device-partitions)
-//!     3. [Partition a device](#partition-a-device)
-//!
 //! ## Description
 //!
 //! The `fdisk` module holds the main objects a user needs to read, edit, create partition
